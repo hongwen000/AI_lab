@@ -1,0 +1,63 @@
+release
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+**/build
+*.img
+/*/kernel_bin_dump
+/*/kernel_elf_dump
+*.swp
+os_lab3/test/libc/test*
+
+gdbdash
+.gdbdash
+.gdbinit
+.aux
+OStoolsDOS
+/*/cmake-build-debug/*
+/*/.idea/*
+kernel_bin_dump
+kernel_elf_dump
+.idea/misc.xml
+.idea/modules.xml
+.idea/test.iml
+.idea/workspace.xml
+.idea/codeStyles/Project.xml
+cmake-build-debug
+cmake-build-debug/
+/*/cmake-build-debug/
+/*/.idea/
+.idea/
+bchs
+handon

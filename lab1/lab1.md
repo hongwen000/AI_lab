@@ -32,12 +32,87 @@ KNN算法的是一种监督学习方法，它的基本原理是：对于要预�
 
 ## 二、伪代码
 
+下面的伪代码展示了执行一次回归问题求解的基本框架（分类问题与之类似）
 
+```python
+# 步骤一：从文件读取输入
+trainX_data, trainY_data = ReadFileFunc(train_filen) #读取训练集X，训练集Y
+vaildX_data, vaildY_data = ReadFileFunc(vaild_filen) #读取验证集X，验证集Y
+# 步骤二：将输入向量化
+trainX, trainY = vectorizeData(trainX_data, trainY_data)
+vaildX, vaildY = vectorizeData(vaildX_data, vaildY_data)
+# 步骤三：执行KNN函数，得到预测的Y
+predictY = knnFunc(trainX, trainY, vaildX)
+# 步骤四：将预测的Y与验证集的Y作对比得到回归相关度
+print("Correlation Coefficient: ", pearsonr(predictY, vaildY)
+```
+
+由于Python代码已经很类似伪代码，因此下面以流程图的方式展示TF-IDF及KNN算法的原理，关键代码在下一节展示。
+
+1. TF-IDF流程图
+
+![image-20180918212246453](lab1.assets/image-20180918212246453.png)
+
+
+
+2. KNN算法流程图
+
+   ![image-20180918212602052](lab1.assets/image-20180918212602052.png)
 
 ## 三、关键代码截图（带注释）
 
+1. 获取TF-IDF矩阵
 
+![image-20180918214035884](lab1.assets/image-20180918214035884.png)
+
+2. KNN主函数，它是一个高阶函数，距离测度和加权函数均是在外部实现，并传入其中的，因此可以很方便地尝试各种求距离和加权的方法。
+
+![image-20180918214019856](lab1.assets/image-20180918214019856.png)
+
+3. 四组距离测度函数
+
+![image-20180918214001323](lab1.assets/image-20180918214001323.png)
+
+4. 对K个最邻近的结果加权求和的函数
+
+![image-20180918214131762](lab1.assets/image-20180918214131762.png)
 
 ## 四、创新点&优化
 
-1. 在处理TF-IDF矩阵时引入了特殊的nan单词，代表训练集中没有而出现在预测集中的单词。
+1. 在处理TF-IDF矩阵时引入了特殊的nan单词，代表训练集中没有而出现在预测集中的单词。避免了一个所有单词均不在训练集中的要预测的向量。
+2. 使用函数式编程，实现了全自动调参框架autoTrain，接收不同的距离测度等参数作为输入，自动测量最好的参数组合
+3. 使用map、filter、list comprehension等抽象程度更高的函数以及numpy自带矩阵运算替代低效的for循环，代码简洁，程序执行速度较快
+
+## 五、实验结果展示
+
+TF-IDF:
+
+![image-20180918225249217](lab1.assets/image-20180918225249217.png)
+
+KNN:
+
+![image-20180918225406725](lab1.assets/image-20180918225406725.png)
+
+## 六、**评测指标展示即分析**
+
+分类：使用TF-IDF，K为10，使用余弦距离时有最佳分类结果，准确度为0.48
+
+![image-20180918224925693](lab1.assets/image-20180918224925693.png)
+
+回归：使用TF-IDF，K为9，使用余弦距离时有最佳回归结果，相关度为0.40
+
+![image-20180918224941957](lab1.assets/image-20180918224941957.png)
+
+## 七、思考题
+
+1. IDF的第二个计算公式当中出现的分母多了1是什么意思？
+
+   答：避免当一个单词在每一篇文章中均不出现（测试集数据可能出现这种情况）时分母为0导致运算异常
+
+2.	IDF数值有什么意义？TF_IDF数值有什么含义？
+
+   IDF数值表示某个词在文章集合中的出现的稀有度，这个值越大，代表有它出现的文章越少。TF_IDF数值代表一个单词在整个文本集中的重要程度。
+
+3.	（距离作为权重）为什么是倒数呢？
+
+   越近的向量的权重应当越大，取倒数能表示这一关系。

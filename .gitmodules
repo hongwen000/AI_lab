@@ -1,0 +1,3 @@
+[submodule "lab2/code/submodules/range-v3"]
+	path = lab2/code/submodules/range-v3
+	url = https://github.com/ericniebler/range-v3.git
