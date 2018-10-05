@@ -6,8 +6,10 @@
 #include <Eigen/Dense>
 #include "gtest/gtest.h"
 #include "mkl.h"
-#include "matplotlibcpp.h"
-namespace plt = matplotlibcpp;
+#include "range/v3/view.hpp"
+#include "functional"
+#include "AI_utility.h"
+using namespace ranges;
 
 
 using namespace std;
@@ -58,6 +60,39 @@ TEST(E, 4)
     Foo *foo = new Foo;
     foo-> v << 1, 2;
     cout << foo->v << endl;
+}
+
+TEST(E, 5)
+{
+    std::vector<std::vector<int>> trainX = {
+            {1, 2, 3, 4},
+            {2, 3, 4, 5},
+            {3, 4, 5, 6}
+    };
+    std::set<int> D = {1,2};
+    auto v = std::vector<const std::vector<int>*>{};
+    for (auto i : D)
+    {
+        v.push_back(&trainX[i]);
+    }
+    for(auto x : v)
+    {
+        for(const auto& i : *x)
+            cout << i << ',';
+        cout << endl;
+    }
+}
+
+
+TEST(E, 6)
+{
+    Eigen::MatrixXd trainX(3,4);
+    trainX<<1, 2, 3, 4,
+            2, 3, 4, 5,
+            3, 4, 5, 6;
+    Eigen::MatrixXd mp = trainX.block(0,1, 3,2);
+//    Eigen::Map<MatrixXd> mp(trainX.data() + 6 * sizeof(double), trainX.rows(), trainX.cols() / 2);
+    cout << mp;
 }
 
 int main(int argc, char *argv[])
