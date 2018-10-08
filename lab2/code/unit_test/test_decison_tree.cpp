@@ -9,6 +9,24 @@
 #include <chrono>
 using namespace std;
 
+TEST(T, 0)
+{
+    Matrix data(5, 14);
+    data <<0,0,1,2,2,2,1,0,0,2,0,1,1,2,
+            2,2,2,1,0,0,0,1,0,1,1,1,2,1,
+            0,0,0,0,1,1,1,0,1,1,1,0,1,0,
+            0,1,0,0,0,1,1,0,0,0,1,1,0,1,
+            0,0,1,1,1,0,1,0,1,1,1,1,1,0;
+    constexpr double BLOCK_NUM = 5.0;
+    auto all = view::ints(0, (int)data.cols());
+    for(int i = 0; i < BLOCK_NUM; ++i)
+    {
+        auto vaildSetRange = view::ints((int)(i / BLOCK_NUM * data.cols()), (int)((i + 1) / BLOCK_NUM * data.cols()));
+        auto trainSetRange = view::set_difference(all, vaildSetRange);
+        matrix_view<int> vaildSet(data, vaildSetRange);
+        matrix_view<int> trainSet(data, trainSetRange);
+    }
+}
 TEST(T, 1)
 {
     Matrix a(5, 14);
@@ -27,6 +45,12 @@ TEST(T, 1)
             {3, {"信用等级", "fair", "excellent"}},
             {-1, {"no", "yes"}}
     };
+
+    auto ret = t.predict(a);
+    for(auto i : ret)
+        cout << i << ",";
+    cout << endl;
+    cout << t.vaild(a);
     auto s = t.print(mp);
     std::cout << "--------" << std::endl;
     std::cout << s << std::endl;
@@ -78,8 +102,9 @@ TEST(T, 2)
                     {"£ø", 0}
             }
     };
-    Matrix ret = vectorizeData(f, mp);
-    DecisionTree t(ret, {4,4,4,3,3,3});
+    Matrix trainSetOri = vectorizeData(f, mp);
+    auto trainSet = matrix_view<int>(trainSetOri, view::ints(0, 31));
+    DecisionTree t(trainSet, {4,4,4,3,3,3});
     JudgeFunc_t func = JudgeFunc::CART;
     auto start = chrono::steady_clock::now();
     t.train(func);
@@ -99,7 +124,7 @@ TEST(T, 2)
     std::ofstream of("/Users/lixinrui/1.dot");
     of << s;
     of.close();
-
+    cout << t.vaild(trainSet);
 }
 int main(int argc, char *argv[])
 {

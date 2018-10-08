@@ -27,11 +27,6 @@ public:
         {
             view.push_back(i);
         }
-//        for(auto i : view)
-//        {
-//            std::cout << i << ',';
-//        }
-//        std::cout << std::endl;
     }
     matrix_view(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& _vec, const std::vector<Eigen::Index>& ilist): vec(_vec.data(), _vec.rows(), _vec.cols())
     {
@@ -48,7 +43,7 @@ public:
         for(const auto& i: ilist)
         {
             if(i < father.cols())
-                view.push_back(i);
+                view.push_back(father.view[i]);
             else
                 throw(std::out_of_range("matrix_view ~ ctor ~ father.cols = " + std::to_string(father.cols()) + " ~ i = " + std::to_string(i)));
         }
@@ -127,5 +122,22 @@ public:
         }
         return ret;
     }
+
 };
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const matrix_view<T>& mv)
+{
+    if(mv.empty())
+        return os;
+    for(Eigen::Index i = 0; i < mv.rows(); ++i)
+    {
+        for(Eigen::Index j = 0; j < mv.cols(); ++j)
+        {
+            os << mv(i, j) << ", ";
+        }
+        os << std::endl;
+    }
+    return os;
+}
 #endif //DECISIONTREE_MATRIX_VIEW_H

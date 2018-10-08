@@ -8,9 +8,7 @@
 void DecisionTree::train_worker(DecisionTree::Node *node, std::function<double (const matrix_view<int> &, int, int)> &GainFunc)
 {
     auto D_Y = node->D.row(-1);
-//    std::cout << "-------------" << std::endl;
-//    std::cout << "[D_Y]: " << D_Y << std::endl;
-    auto mode = D_Y.sum() >= (node->D.cols() / 2);
+    auto mode = (double)D_Y.sum() >= (node->D.cols() / 2.0);
     //若A为空集
     if(node->A.empty())
     {
@@ -55,7 +53,7 @@ void DecisionTree::train_worker(DecisionTree::Node *node, std::function<double (
     node->A.erase(ranges::v3::find(node->A, a_star));
     for(int i = 0; i < featureValues[a_star]; ++i)
     {
-        auto n = new Node(matrix_view<int>(trainSet, S[i]), node->A);
+        auto n = new Node(matrix_view<int>(node->D, S[i]), node->A);
         if(S[i].empty())
         {
             n->isLeaf = true;
@@ -74,29 +72,15 @@ std::string DecisionTree::print_worker(DecisionTree::Node *node, int n, int cn, 
 {
     std::stringstream ss;
     string node_name = trace + "F" +  to_string(node->C) + "C" + to_string(cn);
-    for(auto& i : node_name)
-    {
-        if(i == '-')
-            i = '_';
-    }
     if(node->isLeaf)
         ss << node_name << "[label=\"" << mp[node->C][node->Y] << "\"];\n";
     else
         ss << node_name << "[label=\"" << mp[node->C][0] << "\"];\n";
-
-//    for(int i = 0; i < n; ++i)
-//        std::cout << '\t';
-//    std::cout << node->C << std::endl;
     for(size_t c = 0; c < node->child.size(); ++c)
     {
         if(node->child[c])
         {
             string child_name = node_name + "F" + to_string(node->child[c]->C) + "C" + to_string(c);;
-            for(auto& i : child_name)
-            {
-                if(i == '-')
-                    i = '_';
-            }
             ss << node_name << "->" << child_name << "[label=\"" << mp[node->C][c + 1] << "\"];\n";
             ss << print_worker(node->child[c], n+1, c, mp, node_name);
         }
@@ -104,7 +88,43 @@ std::string DecisionTree::print_worker(DecisionTree::Node *node, int n, int cn, 
     return ss.str();
 }
 
-DecisionTree::DecisionTree(const Matrix &_trainSet, const Vec<int> &_featureValues)
+
+int DecisionTree::predict(const Eigen::Matrix<int, Eigen::Dynamic, 1>& X, predictOne)
+{
+    auto ptr = root;
+    while(!ptr->isLeaf)
+    {
+        int c = X(ptr->C, 0);
+        ptr = ptr->child[c];
+    }
+    return ptr->Y;
+}
+
+Vec<int> DecisionTree::predict(const matrix_view<int>& X)
+{
+    Vec<int> ret;
+    if(X.empty()) return ret;
+    for(Eigen::Index i = 0; i < X.cols(); ++i)
+    {
+        ret.push_back(predict(X.col(i), predictOne{}));
+    }
+    return ret;
+}
+
+double DecisionTree::vaild(const matrix_view<int>& X)
+{
+    auto ret = predict(X);
+    auto n = X.cols();
+    double correct = 0;
+    for(Eigen::Index i = 0; i < n; ++i)
+    {
+        if(X(-1, i) == ret[i])
+            correct++;
+    }
+    return correct / n;
+}
+
+DecisionTree::DecisionTree(const matrix_view<int> &_trainSet, const Vec<int> &_featureValues)
     :trainSet(_trainSet),
       featureCount(_featureValues.size()),
       featureValues(_featureValues),
@@ -129,10 +149,15 @@ string DecisionTree::print(std::map<int, std::vector<std::string> > &mp)
 
 double JudgeFunc::H(double p)
 {
-    return -p * std::log2(p) - (1 - p) * std::log2(1 - p);
+    auto p1 = p;
+    auto p2 = 1-p;
+    auto ret = -(p1 * std::log(p1)) - (p2 * std::log(p2));
+    if(std::isnan(ret))
+        cout << "p1 = " << p1 << " p2 = " << p2 << endl;
+    return -(p1 * std::log(p1)) - (p2 * std::log(p2));
 }
 
-double JudgeFunc::ID3(const matrix_view<int> &D, int feature, int featureVal)
+double JudgeFunc::JudgeBaseFunc(const matrix_view<int>& D, int feature, int featureVal, const EntropyFunc_t& EntropyFunc, bool splitInfoFlag)
 {
     auto D_Y = D.row(-1);
     auto p = D_Y.sum() * 1.0 / D_Y.size();
@@ -144,41 +169,31 @@ double JudgeFunc::ID3(const matrix_view<int> &D, int feature, int featureVal)
         S[D(feature, i)].first++;
         S[D(feature, i)].second += D(-1, i);
     }
-    double H_D_A = 0;
-    for(auto& p: S)
-    {
-        //        std::cout << p.first << " ~ " << p.second << std::endl;
-        if(p.first == 0 || p.first == p.second)
-            continue;
-        H_D_A += (p.first * 1.0 / n) * H(p.second * 1.0 / p.first);
-        //        std::cout << H_D_A << std::endl;
-    }
-    return H_D - H_D_A;
-}
-
-double JudgeFunc::C45(const matrix_view<int> &D, int feature, int featureVal)
-{
-    auto D_Y = D.row(-1);
-    auto p = D_Y.sum() * 1.0 / D_Y.size();
-    auto H_D = H(p);
-    Vec<pair<int, int>> S(featureVal);
-    int n = D.cols();
-    for(int i = 0; i < n; ++i)
-    {
-        S[D(feature, i)].first++;
-        S[D(feature, i)].second += D(-1, i);
-    }
+    //TODO
     double H_D_A = 0;
     double SplitInfo = 0;
     for(auto& p: S)
     {
-        if(p.first == 0 || p.first == p.second)
+        if(p.first == 0 || p.second == 0|| p.first == p.second)
             continue;
-        H_D_A += (p.first * 1.0 / n) * H(p.second * 1.0 / p.first);
+        H_D_A += (p.first * 1.0 / n) * EntropyFunc(p.second * 1.0 / p.first);
         SplitInfo += (-(p.first*1.0/n) * std::log2(p.first*1.0/n));
     }
     auto Gain_D =  H_D - H_D_A;
-    return Gain_D / SplitInfo;
+    if(splitInfoFlag)
+        return Gain_D / SplitInfo;
+    else
+        return Gain_D;
+}
+
+double JudgeFunc::ID3(const matrix_view<int> &D, int feature, int featureVal)
+{
+    return JudgeBaseFunc(D, feature, featureVal, H, false);
+}
+
+double JudgeFunc::C45(const matrix_view<int> &D, int feature, int featureVal)
+{
+    return JudgeBaseFunc(D, feature, featureVal, H, true);
 }
 
 double JudgeFunc::gini(double p)
@@ -188,24 +203,7 @@ double JudgeFunc::gini(double p)
 
 double JudgeFunc::CART(const matrix_view<int> &D, int feature, int featureVal)
 {
-    auto D_Y = D.row(-1);
-    auto p = D_Y.sum() * 1.0 / D_Y.size();
-    auto gini_D = gini(p);
-    Vec<pair<int, int>> S(featureVal);
-    int n = D.cols();
-    for(int i = 0; i < n; ++i)
-    {
-        S[D(feature, i)].first++;
-        S[D(feature, i)].second += D(-1, i);
-    }
-    double gini_D_A = 0;
-    for(auto p: S)
-    {
-        if(p.first == 0 || p.first == p.second)
-            continue;
-        gini_D_A += (p.first * 1.0 / n) * gini(p.second * 1.0 / p.first);
-    }
-    return gini_D - gini_D_A;
+    return JudgeBaseFunc(D, feature, featureVal, gini, false);
 }
 
 Matrix vectorizeData(const FileData_t & fileData, vector<map<string, int>>& mp)

@@ -28,7 +28,9 @@ auto range = [](int l, int r){
 };
 
 class DecisionTree {
-    const Matrix& trainSet;
+    struct predictOne{};
+    matrix_view<int> trainSet;
+//    const Matrix& trainSet;
     int featureCount;
     const Vec<int>featureValues;
     struct Node {
@@ -49,16 +51,20 @@ class DecisionTree {
     Node* root;
     void train_worker(Node* node, JudgeFunc_t& GainFunc);
     std::string print_worker(Node* node, int n, int cn, std::map<int, std::vector<std::string>>& mp, string trace);
-
+    int predict(const Eigen::Matrix<int, Eigen::Dynamic, 1>& X, predictOne);
 public:
-    DecisionTree(const Matrix& _trainSet, const Vec<int>& _featureValues);
+    DecisionTree(const matrix_view<int>& _trainSet, const Vec<int>& _featureValues);
     void train(JudgeFunc_t& GainFunc);
+    Vec<int> predict(const matrix_view<int>& X);
+    double vaild(const matrix_view<int>& X);
     string print(std::map<int, std::vector<std::string>>& mp);
 };
 
 class JudgeFunc {
     static double H(double p);
     static double gini(double p);
+    using EntropyFunc_t = std::function<double(double)>;
+    static double JudgeBaseFunc(const matrix_view<int>& D, int feature, int featureVal, const EntropyFunc_t& entropyFunc, bool splitInfoFlag);
 public:
     static double ID3(const matrix_view<int>& D, int feature, int featureVal);
     static double C45(const matrix_view<int>& D, int feature, int featureVal);
