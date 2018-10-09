@@ -103,14 +103,7 @@ TEST(T, 2)
             }
     };
     Matrix trainSetOri = vectorizeData(f, mp);
-    auto trainSet = matrix_view<int>(trainSetOri, view::ints(0, 31));
-    DecisionTree t(trainSet, {4,4,4,3,3,3});
-    JudgeFunc_t func = JudgeFunc::CART;
-    auto start = chrono::steady_clock::now();
-    t.train(func);
-    auto end = chrono::steady_clock::now();
-    auto diff = end - start;
-    cout << chrono::duration <double, milli> (diff).count() << " ms" << endl;
+    auto trainSet = matrix_view<int>(trainSetOri);
     std::map<int, std::vector<std::string>> rmp = {
             {0,  {"buying",   "low",   "med", "high", "v-high"}},
             {1,  {"maint",    "low",   "med", "high", "v-high"}},
@@ -120,11 +113,33 @@ TEST(T, 2)
             {5,  {"safety",   "low",   "med", "high"}},
             {-1, {"0",      "1"}}
     };
-    auto s = t.print(rmp);
-    std::ofstream of("/Users/lixinrui/1.dot");
-    of << s;
-    of.close();
-    cout << t.vaild(trainSet);
+    for(int i = 0; i < 3; ++i)
+    {
+        DecisionTree t(trainSet, {4,4,4,3,3,3});
+        JudgeFunc_t func;
+        if(i == 0)
+            func = JudgeFunc::ID3;
+        if(i == 1)
+            func = JudgeFunc::C45;
+        if(i == 2)
+            func = JudgeFunc::CART;
+        auto start = chrono::steady_clock::now();
+        t.train(func);
+        auto end = chrono::steady_clock::now();
+        auto diff = end - start;
+        cout << chrono::duration <double, milli> (diff).count() << " ms" << endl;
+        auto s = t.print(rmp);
+        std::ofstream of;
+        if(i == 0)
+            of.open("/Users/lixinrui/ID3.dot");
+        if(i == 1)
+            of.open("/Users/lixinrui/C45.dot");
+        if(i == 2)
+            of.open("/Users/lixinrui/CART.dot");
+        of << s;
+        of.close();
+        cout << t.vaild(trainSet);
+    }
 }
 int main(int argc, char *argv[])
 {

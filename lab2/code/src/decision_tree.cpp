@@ -4,10 +4,16 @@
 
 #include "decision_tree.h"
 
-
-void DecisionTree::train_worker(DecisionTree::Node *node, std::function<double (const matrix_view<int> &, int, int)> &GainFunc)
+/*
+* 对应伪代码中的train函数
+* Node为节点类型
+* judge_func是一个函数参数，它的不同决定了决策树是ID3/还是CART
+*/
+void DecisionTree::train_worker(DecisionTree::Node *node, JudgeFunc_t& judgeFunc)
 {
+    //获取该节点全部数据集的Y值
     auto D_Y = node->D.row(-1);
+    //计算众数
     auto mode = (double)D_Y.sum() >= (node->D.cols() / 2.0);
     //若A为空集
     if(node->A.empty())
@@ -39,21 +45,27 @@ void DecisionTree::train_worker(DecisionTree::Node *node, std::function<double (
         node->Y = mode;
         return;
     }
-
+    //对于每一种特征计算信息增益或基尼系数的减少值
     Vec<double> info_gain;
     for(auto i: node->A)
-        info_gain.push_back(GainFunc(node->D, i, featureValues[i]));
+        info_gain.push_back(judgeFunc(node->D, i, featureValues[i]));
+    //a_star是信息增益最大的一组特征
     auto a_star = node->A[max_element(info_gain) - std::begin(info_gain)];
+    node->C = a_star;
+    //依据该组特征值划分数据集
     Vec<Vec<Index>> S(featureValues[a_star]);
     for(int i = 0; i < node->D.cols(); ++i)
     {
         S[node->D(a_star, i)].push_back(i);
     }
-    node->C = a_star;
+    //在特征空间中移除a_star
     node->A.erase(ranges::v3::find(node->A, a_star));
+    //对于a_star的每个取值
     for(int i = 0; i < featureValues[a_star]; ++i)
     {
+        // 取对应属性值相同的子训练集
         auto n = new Node(matrix_view<int>(node->D, S[i]), node->A);
+        // 若子训练集为空，则将这个子节点标为叶节点，无需递归下去
         if(S[i].empty())
         {
             n->isLeaf = true;
@@ -62,7 +74,8 @@ void DecisionTree::train_worker(DecisionTree::Node *node, std::function<double (
         }
         else
         {
-            train_worker(n, GainFunc);
+            //递归训练并添加到子节点集中
+            train_worker(n, judgeFunc);
             node->child.push_back(n);
         }
     }
@@ -72,6 +85,7 @@ std::string DecisionTree::print_worker(DecisionTree::Node *node, int n, int cn, 
 {
     std::stringstream ss;
     string node_name = trace + "F" +  to_string(node->C) + "C" + to_string(cn);
+    for(auto& i : node_name) if(i == '-') i = '_';
     if(node->isLeaf)
         ss << node_name << "[label=\"" << mp[node->C][node->Y] << "\"];\n";
     else
@@ -81,6 +95,7 @@ std::string DecisionTree::print_worker(DecisionTree::Node *node, int n, int cn, 
         if(node->child[c])
         {
             string child_name = node_name + "F" + to_string(node->child[c]->C) + "C" + to_string(c);;
+            for(auto& i : child_name) if(i == '-') i = '_';
             ss << node_name << "->" << child_name << "[label=\"" << mp[node->C][c + 1] << "\"];\n";
             ss << print_worker(node->child[c], n+1, c, mp, node_name);
         }
@@ -133,9 +148,9 @@ DecisionTree::DecisionTree(const matrix_view<int> &_trainSet, const Vec<int> &_f
                range(0, featureCount)))
 {}
 
-void DecisionTree::train(std::function<double (const matrix_view<int> &, int, int)> &GainFunc)
+void DecisionTree::train(std::function<double (const matrix_view<int> &, int, int)> &judgeFunc)
 {
-    train_worker(root, GainFunc);
+    train_worker(root, judgeFunc);
 }
 
 string DecisionTree::print(std::map<int, std::vector<std::string> > &mp)
@@ -177,7 +192,7 @@ double JudgeFunc::JudgeBaseFunc(const matrix_view<int>& D, int feature, int feat
         if(p.first == 0 || p.second == 0|| p.first == p.second)
             continue;
         H_D_A += (p.first * 1.0 / n) * EntropyFunc(p.second * 1.0 / p.first);
-        SplitInfo += (-(p.first*1.0/n) * std::log2(p.first*1.0/n));
+        SplitInfo += (-(p.first*1.0/n) * std::log(p.first*1.0/n));
     }
     auto Gain_D =  H_D - H_D_A;
     if(splitInfoFlag)

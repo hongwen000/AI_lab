@@ -49,12 +49,12 @@ class DecisionTree {
         int Y;
     };
     Node* root;
-    void train_worker(Node* node, JudgeFunc_t& GainFunc);
+    void train_worker(Node* node, JudgeFunc_t& judgeFunc);
     std::string print_worker(Node* node, int n, int cn, std::map<int, std::vector<std::string>>& mp, string trace);
     int predict(const Eigen::Matrix<int, Eigen::Dynamic, 1>& X, predictOne);
 public:
     DecisionTree(const matrix_view<int>& _trainSet, const Vec<int>& _featureValues);
-    void train(JudgeFunc_t& GainFunc);
+    void train(JudgeFunc_t& judgeFunc);
     Vec<int> predict(const matrix_view<int>& X);
     double vaild(const matrix_view<int>& X);
     string print(std::map<int, std::vector<std::string>>& mp);

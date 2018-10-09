@@ -61,25 +61,39 @@ std::map<std::string, JudgeFunc_t> JudgeFuncs = {
 
 int main()
 {
+    auto now = [](){return chrono::steady_clock::now();};
+    auto print_ret = [](auto K, auto name, auto diff, auto acc){cout << "K = " << K << " " << name << " spent " << chrono::duration <double, milli> (diff).count() << " ms, acc: " << acc << endl;};
+    //读取训练集数据
     auto f = readFile("data/Car_train.csv");
+    //向量化
     auto data = vectorizeData(f, mp);
-    constexpr double BLOCK_NUM = 5.0;
-    auto all = view::ints(0, (int)data.cols());
-    for(int i = 0; i < BLOCK_NUM; ++i)
+    //K遍历5到14的值
+    for(double K: range(5, 17))
     {
-        auto vaildSetRange = view::ints((int)(i / BLOCK_NUM * data.cols()), (int)((i + 1) / BLOCK_NUM * data.cols()));
-        auto trainSetRange = view::set_difference(all, vaildSetRange);
-        matrix_view<int> vaildSet(data, vaildSetRange);
-        matrix_view<int> trainSet(data, trainSetRange);
-        for(auto& [name, Func] : JudgeFuncs)
+        int  N = data.cols();
+        int  pieceSize = N / K;
+        auto all = range(0, N);
+        for(auto i : range(0, K))
         {
-            DecisionTree t(trainSet, {4,4,4,3,3,3});
-            auto start = chrono::steady_clock::now();
-            t.train(Func);
-            auto end = chrono::steady_clock::now();
-            auto diff = end - start;
-            auto acc = t.vaild(vaildSet);
-            cout << name << " spent " << chrono::duration <double, milli> (diff).count() << " ms, acc: " << acc << endl;
+            //分割验证集 1/K 的数据作为验证集
+            auto vaildSetRange = range(i * pieceSize, (i + 1) * pieceSize);
+            matrix_view<int> vaildSet(data, vaildSetRange);
+            //其余数据作为训练集
+            auto trainSetRange = view::set_difference(all, vaildSetRange);
+            matrix_view<int> trainSet(data, trainSetRange);
+            //遍历三种决策树方法
+            for(auto& [name, Func] : JudgeFuncs)
+            {
+                auto featureValRanges = {4,4,4,3,3,3};
+                DecisionTree t(trainSet, featureValRanges);
+                //计时并建树
+                auto start = now();
+                t.train(Func);
+                auto diff = now() - start;
+                //验证并打印结果
+                auto acc = t.vaild(vaildSet);
+                print_ret(K, name, diff, acc);
+            }
         }
     }
 }
