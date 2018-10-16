@@ -90,7 +90,7 @@ int main()
                 //计时并建树
                 auto start = now();
                 t.train(Func, 100, 4);
-                // t.prune();
+                t.prune();
                 auto diff = now() - start;
                 //验证并打印结果
                 auto acc = t.vaild(vaildSet);
