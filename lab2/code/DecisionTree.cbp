@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="DecisionTree"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="clang"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\..\;CMake Files\..\..\..\..\..\usr\;CMake Files\..\..\..\..\..\usr\local\;CMake Files\..\..\..\..\..\usr\local\share\;CMake Files\..\..\..\..\..\usr\local\share\eigen3\;CMake Files\..\..\..\..\..\usr\local\share\eigen3\cmake\;CMake Files\..\..\..\..\..\usr\local\lib\;CMake Files\..\..\..\..\..\usr\local\lib\cmake\;CMake Files\..\..\..\..\..\usr\local\lib\cmake\range-v3\;CMake Files\unit_test\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="main">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/main" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+					<Add directory="/usr/local/include/eigen3"/>
+					<Add directory="/usr/local/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 main"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="main/fast">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/main" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+					<Add directory="/usr/local/include/eigen3"/>
+					<Add directory="/usr/local/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 main/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_AI_utility.cpp">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_AI_utility.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_AI_utility.cpp"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_AI_utility.cpp/fast">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_AI_utility.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_AI_utility.cpp/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_ranges.cpp">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_ranges.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_ranges.cpp"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_ranges.cpp/fast">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_ranges.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_ranges.cpp/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_array_view.cpp">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_array_view.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_array_view.cpp"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_array_view.cpp/fast">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_array_view.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_array_view.cpp/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_matrix_view.cpp">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_matrix_view.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_matrix_view.cpp"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_matrix_view.cpp/fast">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_matrix_view.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_matrix_view.cpp/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_decison_tree.cpp">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_decison_tree.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_decison_tree.cpp"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_decison_tree.cpp/fast">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_decison_tree.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_decison_tree.cpp/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_eigen3.cpp">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_eigen3.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+					<Add directory="/usr/local/include/eigen3"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_eigen3.cpp"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_eigen3.cpp/fast">
+				<Option output="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_eigen3.cpp" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/lixinrui/AI_lab/lab2/code/unit_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/opt/intel/compilers_and_libraries_2018.3.185/mac/mkl/include"/>
+					<Add directory="/Users/lixinrui/AI_lab/lab2/code/inc"/>
+					<Add directory="/usr/local/include/eigen3"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 test_eigen3.cpp/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/lixinrui/AI_lab/lab2/code/unit_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/inc/AI_utility.h">
+			<Option target="main"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/inc/array_view.h">
+			<Option target="main"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/inc/decision_tree.h">
+			<Option target="main"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/inc/matrix_view.h">
+			<Option target="main"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/main.cpp">
+			<Option target="main"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/src/AI_utility.cpp">
+			<Option target="main"/>
+			<Option target="test_AI_utility.cpp"/>
+			<Option target="test_ranges.cpp"/>
+			<Option target="test_array_view.cpp"/>
+			<Option target="test_matrix_view.cpp"/>
+			<Option target="test_decison_tree.cpp"/>
+			<Option target="test_eigen3.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/src/decision_tree.cpp">
+			<Option target="main"/>
+			<Option target="test_decison_tree.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/src/matrix_view.cpp">
+			<Option target="main"/>
+			<Option target="test_AI_utility.cpp"/>
+			<Option target="test_ranges.cpp"/>
+			<Option target="test_array_view.cpp"/>
+			<Option target="test_matrix_view.cpp"/>
+			<Option target="test_decison_tree.cpp"/>
+			<Option target="test_eigen3.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/src/random_lib.cpp">
+			<Option target="main"/>
+			<Option target="test_AI_utility.cpp"/>
+			<Option target="test_ranges.cpp"/>
+			<Option target="test_array_view.cpp"/>
+			<Option target="test_matrix_view.cpp"/>
+			<Option target="test_decison_tree.cpp"/>
+			<Option target="test_eigen3.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_AI_utility.cpp">
+			<Option target="test_AI_utility.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_array_view.cpp">
+			<Option target="test_array_view.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_decison_tree.cpp">
+			<Option target="test_decison_tree.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_eigen3.cpp">
+			<Option target="test_eigen3.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_matrix_view.cpp">
+			<Option target="test_matrix_view.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/unit_test/test_ranges.cpp">
+			<Option target="test_ranges.cpp"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/../../../../../usr/local/share/eigen3/cmake/Eigen3Config.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\usr\local\share\eigen3\cmake\"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/../../../../../usr/local/share/eigen3/cmake/Eigen3ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\usr\local\share\eigen3\cmake\"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/../../../../../usr/local/share/eigen3/cmake/Eigen3Targets.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\usr\local\share\eigen3\cmake\"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/../../../../../usr/local/lib/cmake/range-v3/range-v3-config-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\usr\local\lib\cmake\range-v3\"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/../../../../../usr/local/lib/cmake/range-v3/range-v3-config.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\usr\local\lib\cmake\range-v3\"/>
+		</Unit>
+		<Unit filename="/Users/lixinrui/AI_lab/lab2/code/unit_test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\unit_test\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

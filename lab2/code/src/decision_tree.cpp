@@ -411,3 +411,11 @@ double BaggingTree::vaild(const matrix_view<int>& X)
     }
     return correct / n;
 }
+
+void BaggingTree::prune()
+{
+    for(auto ptr: forests)
+    {
+        ptr->prune();
+    }
+}

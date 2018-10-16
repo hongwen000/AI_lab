@@ -86,6 +86,9 @@ public:
     BaggingTree(const matrix_view<int>& _trainSet, const Vec<int>& _featureValues);
     void train(const JudgeFunc_t& judgeFunc, int M, int k);
     Vec<int> predict(const matrix_view<int>& X);
+    void prune();
     double vaild(const matrix_view<int>& X);
 };
+
+
 #endif //DECISIONTREE_DECISION_TREE_H
