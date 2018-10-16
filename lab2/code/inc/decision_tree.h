@@ -49,15 +49,17 @@ class DecisionTree {
         int Y;
     };
     Node* root;
-    void train_worker(Node* node, JudgeFunc_t& judgeFunc);
+    void train_worker(Node* node, const JudgeFunc_t& judgeFunc);
     std::string print_worker(Node* node, int n, int cn, std::map<int, std::vector<std::string>>& mp, string trace);
     int predict(const Eigen::Matrix<int, Eigen::Dynamic, 1>& X, predictOne);
+    int prune_worker(Node* node);
 public:
     DecisionTree(const matrix_view<int>& _trainSet, const Vec<int>& _featureValues);
-    void train(JudgeFunc_t& judgeFunc);
+    void train(const JudgeFunc_t& judgeFunc);
     Vec<int> predict(const matrix_view<int>& X);
     double vaild(const matrix_view<int>& X);
     string print(std::map<int, std::vector<std::string>>& mp);
+    void prune();
 };
 
 class JudgeFunc {
@@ -73,5 +75,17 @@ public:
 
 Matrix vectorizeData(const FileData_t & fileData, vector<map<string, int>>& mp);
 
-
+class BaggingTree {
+    Vec<DecisionTree*> forests;
+    Vec<Vec<Eigen::Index>> forests_A;
+    matrix_view<int> trainSet;
+    Vec<int> featureValues;
+    matrix_view<int> sample_D(const matrix_view<int>& trainSet);
+    Vec<Eigen::Index> sample_A(size_t n, size_t k);
+public:
+    BaggingTree(const matrix_view<int>& _trainSet, const Vec<int>& _featureValues);
+    void train(const JudgeFunc_t& judgeFunc, int M, int k);
+    Vec<int> predict(const matrix_view<int>& X);
+    double vaild(const matrix_view<int>& X);
+};
 #endif //DECISIONTREE_DECISION_TREE_H

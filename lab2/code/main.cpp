@@ -40,7 +40,7 @@ vector<map<string, int>> mp = {
         {
                 {"0", 0},
                 {"1", 1},
-                {"£ø", 0}
+                {"��", 0}
         }
 };
 std::map<int, std::vector<std::string>> rmp = {
@@ -62,13 +62,14 @@ std::map<std::string, JudgeFunc_t> JudgeFuncs = {
 int main()
 {
     auto now = [](){return chrono::steady_clock::now();};
-    auto print_ret = [](auto K, auto name, auto diff, auto acc){cout << "K = " << K << " " << name << " spent " << chrono::duration <double, milli> (diff).count() << " ms, acc: " << acc << endl;};
+    //auto print_ret = [](auto K, auto name, auto diff, auto acc){cout << "K = " << K << " " << name << " spent " << chrono::duration <double, milli> (diff).count() << " ms, acc: " << acc << endl;};
+    auto print_ret = [](auto K, auto name, auto diff, auto acc){cout <<  K << "," << name << "," << chrono::duration <double, milli> (diff).count() << "," << acc << endl;};
     //读取训练集数据
     auto f = readFile("data/Car_train.csv");
     //向量化
     auto data = vectorizeData(f, mp);
-    //K遍历5到14的值
-    for(double K: range(5, 17))
+    //K遍历2到8的值
+    for(double K: range(2, 9))
     {
         int  N = data.cols();
         int  pieceSize = N / K;
@@ -85,10 +86,11 @@ int main()
             for(auto& [name, Func] : JudgeFuncs)
             {
                 auto featureValRanges = {4,4,4,3,3,3};
-                DecisionTree t(trainSet, featureValRanges);
+                BaggingTree t(trainSet, featureValRanges);
                 //计时并建树
                 auto start = now();
-                t.train(Func);
+                t.train(Func, 100, 4);
+                // t.prune();
                 auto diff = now() - start;
                 //验证并打印结果
                 auto acc = t.vaild(vaildSet);
@@ -96,4 +98,19 @@ int main()
             }
         }
     }
+    {
+        matrix_view<int> trainSet(data);
+        auto featureValRanges = {4,4,4,3,3,3};
+        DecisionTree t(trainSet, featureValRanges);
+        t.train(JudgeFunc::C45);
+        auto f = readFile("data/Car_test.csv");
+        auto data = vectorizeData(f, mp);
+        auto ret =t.predict(data);
+        for(auto i : ret)
+        {
+            cout << i << endl;
+        }
+        cout << ranges::v3::accumulate(ret, 0) << endl;
+    }
+
 }

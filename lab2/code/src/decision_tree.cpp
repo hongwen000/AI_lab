@@ -3,13 +3,14 @@
 //
 
 #include "decision_tree.h"
+#include "random_lib.h"
 
 /*
 * 对应伪代码中的train函数
 * Node为节点类型
 * judge_func是一个函数参数，它的不同决定了决策树是ID3/还是CART
 */
-void DecisionTree::train_worker(DecisionTree::Node *node, JudgeFunc_t& judgeFunc)
+void DecisionTree::train_worker(DecisionTree::Node *node, const JudgeFunc_t& judgeFunc)
 {
     //获取该节点全部数据集的Y值
     auto D_Y = node->D.row(-1);
@@ -148,7 +149,7 @@ DecisionTree::DecisionTree(const matrix_view<int> &_trainSet, const Vec<int> &_f
                range(0, featureCount)))
 {}
 
-void DecisionTree::train(std::function<double (const matrix_view<int> &, int, int)> &judgeFunc)
+void DecisionTree::train(const JudgeFunc_t &judgeFunc)
 {
     train_worker(root, judgeFunc);
 }
@@ -160,6 +161,70 @@ string DecisionTree::print(std::map<int, std::vector<std::string> > &mp)
     s << print_worker(root, 0, 0, mp, "");
     s << "}\n";
     return s.str();
+}
+
+//PEP剪枝函数，返回值是当前节点下的叶子节点个数
+int DecisionTree::prune_worker(Node* node)
+{
+    //若当前节点是叶子节点，直接返回1
+    if(node->isLeaf)
+        return 1;
+    else
+    {
+        //统计叶子节点个数
+        int num_leaf = 0;
+        for(auto& i: node->child)
+        {
+            num_leaf += prune_worker(i);
+        }
+        //统计当前训练集上的错误个数error
+        auto ret = predict(node->D);
+        auto num_X = node->D.cols();
+        double error = 0;
+        for(Eigen::Index i = 0; i < num_X; ++i)
+        {
+            if(node->D(-1, i) != ret[i])
+                error++;
+        }
+        //计算错误率ec
+        constexpr double punish = 0.5;
+        auto ec = (error + punish * num_leaf) / num_X;
+        //假设样本为伯努利分布，计算标准差SD
+        auto SD = std::sqrt(num_X * ec * (1-ec));
+        //计算剪枝后的错误个数new_error
+        auto D_Y = node->D.row(-1);
+        auto mode = (double)D_Y.sum() >= (node->D.cols() / 2.0);
+        double new_error = 0;
+        for(Eigen::Index i = 0; i < num_X; ++i)
+        {
+            if(node->D(-1, i) != mode)
+                new_error++;
+        }
+        //若剪枝后错误率更低，则剪枝
+        if(error + SD > new_error + punish)
+        {
+            //将当前节点设为叶子节点，结果设为众数
+            node->isLeaf = true;
+            node->C = -1;
+            node->Y = mode;
+            //删除子节点
+            for(auto &i: node->child)
+            {
+                delete(i);
+            }
+            node->child.clear();
+            //返回叶子节点数为1
+            return 1;
+        }
+        //否则不剪枝
+        else
+            return num_leaf;
+    }
+}
+
+void DecisionTree::prune()
+{
+    prune_worker(root);
 }
 
 double JudgeFunc::H(double p)
@@ -226,14 +291,123 @@ Matrix vectorizeData(const FileData_t & fileData, vector<map<string, int>>& mp)
     if(fileData.empty())
         return Matrix{};
     Matrix ret(fileData[0].size(), fileData.size());
-    for(Eigen::Index j = 0; j < ret.cols(); ++j)
-    {
-        for(Eigen::Index i = 0; i < ret.rows(); ++i)
+    try{
+        for(Eigen::Index j = 0; j < ret.cols(); ++j)
         {
-            if(mp[i].count(fileData[j][i]) == 0)
-                throw(std::runtime_error("Can not translate " + fileData[j][i]));
-            ret(i, j) = mp[i][fileData[j][i]];
+            for(Eigen::Index i = 0; i < ret.rows(); ++i)
+            {
+                if(mp[i].count(fileData[j][i]) == 0)
+                    throw(std::runtime_error("Can not translate " + fileData[j][i]));
+                ret(i, j) = mp[i][fileData[j][i]];
+            }
         }
     }
+    catch (const std::runtime_error& e)
+    {
+        cout << e.what() << endl;
+    }
     return ret;
+}
+
+matrix_view<int> BaggingTree::sample_D(const matrix_view<int>& trainSet)
+{
+    std::vector<Eigen::Index> v;
+    std::set<Eigen::Index> s;
+    auto n = trainSet.cols();
+    for(Eigen::Index i = 0; i < n; ++i)
+    {
+        s.insert(RandLib::uniform_rand(0, n - 1));
+    }
+    for(auto i : s)
+    {
+        v.push_back(i);
+    }
+    return matrix_view<int>(trainSet, v);
+}
+
+Vec<Eigen::Index> BaggingTree::sample_A(size_t n, size_t k)
+{
+    Vec<Eigen::Index> ret;
+    if(k >= n)
+    {
+        return range(Eigen::Index(0), Eigen::Index(n));
+    }
+    std::set<Eigen::Index> sel;
+    while(sel.size() < k)
+    {
+        int s = RandLib::uniform_rand(0, n - 1);
+        sel.insert(s);
+    }
+
+    for(auto i : sel)
+    {
+        ret.push_back(i);
+    }
+    std::sort(ret.begin(), ret.end());
+
+    return ret;
+}
+
+BaggingTree::BaggingTree(const matrix_view<int>& _trainSet, const Vec<int>& _featureValues)
+    :trainSet(_trainSet), featureValues(_featureValues) {}
+
+void BaggingTree::train(const JudgeFunc_t& judgeFunc, int M, int k)
+{
+    for(int i = 0; i < M; ++i)
+    {
+        matrix_view<int> sub_D = sample_D(trainSet);
+        Vec<Eigen::Index> sub_A_idx = sample_A(featureValues.size(), k);
+        sub_A_idx.push_back(-1);
+        forests_A.push_back(sub_A_idx);
+        // for(auto i : sub_A_idx) cout << i << ',';
+        // cout << endl;
+        sub_D.select_row(sub_A_idx);
+        // cout << sub_D << endl;
+        Vec<int> sub_A;
+        for(int i = 0; i < k; ++i)
+        {           
+             sub_A.push_back(featureValues[sub_A_idx[i]]);
+            //  cout << sub_A[i] << ',';
+        }
+        // cout << endl;
+        DecisionTree* tree = new DecisionTree(sub_D, sub_A);
+        forests.push_back(tree);
+        tree->train(judgeFunc);
+    }
+}
+
+Vec<int> BaggingTree::predict(const matrix_view<int>& X)
+{
+    Vec<double> rets(X.cols(), 0.0);
+    Vec<int> ret(X.cols(), 0);
+    if(X.empty()) return ret;
+    for(size_t i = 0; i < forests.size(); ++i)
+    {
+        auto X_ = X;
+        X_.select_row(forests_A[i]);
+        auto oneret = forests[i]->predict(X_);
+        for(size_t i = 0; i < oneret.size(); ++i)
+        {
+            rets[i] += oneret[i];
+        }
+    }
+    for(size_t i = 0; i < rets.size(); ++i)
+    {
+        if(rets[i] > (forests.size() / 2.0))
+            ret[i] = 1;
+    }
+    return ret;
+}
+
+double BaggingTree::vaild(const matrix_view<int>& X)
+{
+    auto ret = predict(X);
+    auto n = X.cols();
+    double correct = 0;
+    for(Eigen::Index i = 0; i < n; ++i)
+    {
+        if(X(-1, i) == ret[i])
+            correct++;
+    }
+    return correct / n;
 }

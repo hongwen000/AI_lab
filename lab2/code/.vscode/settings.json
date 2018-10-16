@@ -43,6 +43,13 @@
         "__config": "cpp",
         "__nullptr": "cpp",
         "new": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "strstream": "cpp",
+        "bitset": "cpp",
+        "cfenv": "cpp",
+        "cinttypes": "cpp",
+        "typeindex": "cpp",
+        "variant": "cpp",
+        "vector": "cpp"
     }
 }

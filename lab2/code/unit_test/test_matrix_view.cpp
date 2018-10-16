@@ -12,6 +12,7 @@ TEST(M, 6)
     a << 1,2,5,7,
          3,4,6,8;
     matrix_view<int> v(a, {1,3});
+    v.select_row({0});
     for(long i = 0; i < v.rows(); ++i)
     {
         for(long j = 0; j < v.cols(); ++j)
