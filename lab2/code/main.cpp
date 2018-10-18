@@ -74,6 +74,10 @@ int main()
         int  N = data.cols();
         int  pieceSize = N / K;
         auto all = range(0, N);
+        double diff = 0;
+        double acc = 0;
+        string name = "CART";
+        auto Func = JudgeFunc::CART;
         for(auto i : range(0, K))
         {
             //分割验证集 1/K 的数据作为验证集
@@ -83,20 +87,21 @@ int main()
             auto trainSetRange = view::set_difference(all, vaildSetRange);
             matrix_view<int> trainSet(data, trainSetRange);
             //遍历三种决策树方法
-            for(auto& [name, Func] : JudgeFuncs)
+            //for(auto& [name, Func] : JudgeFuncs)
             {
                 auto featureValRanges = {4,4,4,3,3,3};
-                BaggingTree t(trainSet, featureValRanges);
+                DecisionTree t(trainSet, featureValRanges);
                 //计时并建树
                 auto start = now();
-                t.train(Func, 100, 4);
-                t.prune();
+                t.train(Func);
+                //t.prune();
                 auto diff = now() - start;
                 //验证并打印结果
-                auto acc = t.vaild(vaildSet);
-                print_ret(K, name, diff, acc);
+                acc += t.vaild(vaildSet);
             }
         }
+        acc /= K;
+        print_ret(K, name, diff, acc);
     }
     {
         matrix_view<int> trainSet(data);

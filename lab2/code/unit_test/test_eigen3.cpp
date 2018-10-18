@@ -5,7 +5,9 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include "gtest/gtest.h"
-#include "mkl.h"
+#ifdef USE_MLK
+    #include "mkl.h"
+#endif
 #include "range/v3/view.hpp"
 #include "functional"
 #include "AI_utility.h"
