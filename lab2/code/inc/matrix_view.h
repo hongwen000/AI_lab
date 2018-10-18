@@ -67,7 +67,7 @@ public:
         {
             if(i < 0)
                 i = rows() + i;
-            if(i < row_view.size())
+            if(i < rows())
                 new_row_view.push_back(row_view[i]);
             else
                 throw(std::out_of_range("matrix_view ~ select_row ~ rows = " + std::to_string(rows()) + " ~ i = " + std::to_string(i)));
@@ -75,17 +75,17 @@ public:
         row_view = new_row_view;
     }
 
-    long cols() const
+    Eigen::Index cols() const
     {
         return view.size();
     }
 
-    long rows() const
+    Eigen::Index rows() const
     {
         return row_view.size();
     }
 
-    long size() const
+    Eigen::Index size() const
     {
         return view.size() * row_view.size();
     }
@@ -144,6 +144,43 @@ public:
         }
         return ret;
     }
+    T sum() const
+    {
+        T ret = 0;
+        for(Eigen::Index j = 0; j < cols(); ++j)
+        {
+            for(Eigen::Index i = 0; i < rows(); ++i)
+            {
+                ret += this->operator()(i, j);
+            }
+        }
+        return ret;
+    }
+
+    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> concretize(const std::function<T(T)>& f = [](const T& a){return a;}) const
+    {
+        Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> ret(rows(), cols());
+        for(Eigen::Index j = 0; j < cols(); ++j)
+        {
+            for(Eigen::Index i = 0; i < rows(); ++i)
+            {
+                ret(i, j) = f(this->operator()(i, j));
+            }
+        }
+        return ret;
+    }
+
+//    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> map(const std::function<T(T)>& f)
+//    {
+//        auto ret = concretize();
+//        for(Eigen::Index j = 0; j < cols(); ++j)
+//        {
+//            for(Eigen::Index i = 0; i < rows(); ++i)
+//            {
+//
+//            }
+//        }
+//    }
 
 };
 

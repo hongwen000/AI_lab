@@ -12,7 +12,9 @@ using std::endl;
 #include <vector>
 #include <eigen3/Eigen/Dense>
 #include "gtest/gtest.h"
-#include "mkl.h"
+#ifdef USE_MLK
+    #include "mkl.h"
+#endif
 
 
 template<typename T>

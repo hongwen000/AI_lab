@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 #include "matrix_view.h"
+#include <tuple>
 #include "iostream"
 using std::vector;
 using std::pair;
@@ -15,9 +16,25 @@ using namespace ranges;
 using std::to_string;
 using std::string;
 using std::map;
-using JudgeFunc_t = std::function<double(const matrix_view<int>&, int feature, int featureVal)>;
+template<typename T>
+    using RowVec = Eigen::Matrix<T, 1, Eigen::Dynamic>;
+using ErrFunc_t = std::function<double(const RowVec<double>&, double avg)>;
 auto range = [](int l, int r){
     return view::ints(l,r);
+};
+namespace RegressionArgs {
+    constexpr double err_tolerance = 0.1;
+};
+class ErrFunc {
+public:
+    static double var(const RowVec<double>& D, double avg) {
+        double ret = 0.0;
+        for(Eigen::Index i = 0; i < D.size(); ++i)
+        {
+            ret += (avg - D[i]) * (avg - D[i]);
+        }
+        return ret;
+    }
 };
 class RegressionTree {
     struct predictOne{};
@@ -30,37 +47,30 @@ class RegressionTree {
         //当前节点的特征集
         Vec<Index> A;
         //子节点
-        Vec<Node*> child;
+        Node* ch_l;
+        Node* ch_r;
         //使用的分类特征
         int C = -1;
         //使用的分类值
-        double s;
+        double S = INFINITY;
         //是否是叶子节点
         bool isLeaf = false;
         //对应的结果
         double Y;
     };
     Node* root;
-    void train_worker(Node* node, const JudgeFunc_t& judgeFunc);
-    std::string print_worker(Node* node, int n, int cn, std::map<int, std::vector<std::string>>& mp, string trace);
-    int predict(const Eigen::Matrix<double, Eigen::Dynamic, 1>& X, predictOne);
+    std::tuple<const matrix_view<double>, const matrix_view<double>> split_data(const matrix_view<double>& D, int a, double s);
+    void train_worker(Node* node, const ErrFunc_t& errFunc);
+    std::string print_worker(Node* node, int n, char cn, const Vec<Str>&, string trace);
+    double predict(const Eigen::Matrix<double, Eigen::Dynamic, 1>& X, predictOne);
     int prune_worker(Node* node);
 public:
     RegressionTree(const matrix_view<double>& _trainSet);
-    void train(const JudgeFunc_t& judgeFunc);
-    Vec<int> predict(const matrix_view<double>& X);
+    void train(const ErrFunc_t& errFunc);
+    Vec<double> predict(const matrix_view<double>& X);
     double vaild(const matrix_view<double>& X);
-    string print(std::map<int, std::vector<std::string>>& mp);
+    string print(const Vec<Str>& mp);
     void prune();
 };
 
-class RegressionJudgeFunc {
-    static double H(double p);
-    static double gini(double p);
-    using EntropyFunc_t = std::function<double(double)>;
-    static double JudgeBaseFunc(const matrix_view<int>& D, int feature, int featureVal, const EntropyFunc_t& entropyFunc, bool splitInfoFlag);
-public:
-    static double ID3(const matrix_view<int>& D, int feature, int featureVal);
-    static double C45(const matrix_view<int>& D, int feature, int featureVal);
-    static double CART(const matrix_view<int>& D, int feature, int featureVal);
-};
+Eigen::MatrixXd vectorizeData(const FileData_t & fileData, vector<map<string, int>>& mp);
