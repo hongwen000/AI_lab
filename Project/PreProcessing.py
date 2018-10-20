@@ -77,8 +77,6 @@ def remove_punc(row_of_words: List[List])->List[List]:
 # In[40]:
 
 
-print(sum(len(row) for row in passage))
-
 
 # ## 去除停用词
 
@@ -179,9 +177,6 @@ def get_wordnet_pos(treebank_tag):
 # In[49]:
 
 
-from pattern.en import lemma
-lemma('countries')
-
 
 # In[50]:
 
@@ -194,7 +189,7 @@ def lemma_passage(passage):
         nrow = []
         for w, pos in nltk.pos_tag(row):
             wordnet_pos = get_wordnet_pos(pos) or wordnet.NOUN
-            nrow.append(lemmatizer.lemmatize(w, pos=wordnet_pos))
+            nrow.append(lemmatizer.lemmatize(w.lower(), pos=wordnet_pos))
         ret[i] = nrow
     return ret
 
@@ -213,29 +208,41 @@ def lemma_passage(passage):
 
 # In[33]:
 
-def PreProcess(filen:str, slice:int) -> List[List]:
+def PreProcess(filen:str, slic = 0, compress = False) -> List[List]:
     # ## 读取文件
-    filen = 'data/5/testData.txt'
     fdata = list(open(filen))
-    fdata = fdata[0:1000]
+    if slic != 0:
+        fdata = fdata[0:slic]
     # ## 分词
+    print("Step 1: Spliting words")
     passage = split_words(fdata)
     print("#word After spliting: ", sum(len(row) for row in passage))
     # ## 去除非单词
+    print("Step 2: Remove punc")
     passage = remove_punc(passage)
     print("#word After removing punc: ", sum(len(row) for row in passage))
     # ## 拼写检查
-    passage = list_multiprocess(passage, words_spell_check, 6)
-    # ## 词形还原
+    print("Step 3: Checking lemma using 12 processes")
+    passage = list_multiprocess(passage, words_spell_check, 12)
+    # ## 词形还原，转换为小写
+    print("Step 4: Lemma")
     passage = lemma_passage(passage)
     print("#word After lemma: ", sum(len(row) for row in passage))
     # ## 去除停用词
+    print("Step 5: Remove stopwords")
     passage_compress = remove_stop_words(passage)
     print("#word After removing stopwords: ", sum(len(row) for row in passage))
+    
     with open(os.path.splitext(filen)[0] + "clean.csv", "w") as f:
         writer = csv.writer(f)
         writer.writerows(passage)
+        print("File [" + os.path.splitext(filen)[0] + "clean.csv" +"] ({} lines) saved".format(len(passage)))
     with open(os.path.splitext(filen)[0] + "clean_compress.csv", "w") as f:
         writer = csv.writer(f)
         writer.writerows(passage_compress)
+        print("File [" + os.path.splitext(filen)[0] + "clean_compress.csv" +"] ({} lines) saved".format(len(passage_compress)))
+    if compress:
+        return passage_compress
+    else:
+        return passage
 
