@@ -223,11 +223,26 @@ def PreProcess(filen:str, slic = 0, compress = False) -> List[List]:
     print("#word After removing punc: ", sum(len(row) for row in passage))
     # ## 拼写检查
     print("Step 3: Checking lemma using 12 processes")
+    a = [set(row) for row in passage]
+    ret = set()
+    for row in a:
+        ret = ret | set(row)
+    print("Words: ", len(ret))
     passage = list_multiprocess(passage, words_spell_check, 12)
+    a = [set(row) for row in passage]
+    ret = set()
+    for row in a:
+        ret = ret | set(row)
+    print("Words: ", len(ret))
     # ## 词形还原，转换为小写
     print("Step 4: Lemma")
     passage = lemma_passage(passage)
     print("#word After lemma: ", sum(len(row) for row in passage))
+    a = [set(row) for row in passage]
+    ret = set()
+    for row in a:
+        ret = ret | set(row)
+    print("Words: ", len(ret))
     # ## 去除停用词
     print("Step 5: Remove stopwords")
     passage_compress = remove_stop_words(passage)

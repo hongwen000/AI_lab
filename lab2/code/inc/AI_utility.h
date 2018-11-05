@@ -57,4 +57,6 @@ bool all_equal(const Eigen::DenseBase<Derived>& b, int v)
     }
     return true;
 }
+Eigen::MatrixXd readProject(const Str& filen);
+Eigen::MatrixXd readTest(const Str& filen);
 #endif //DECISIONTREE_AI_UTILITY_H

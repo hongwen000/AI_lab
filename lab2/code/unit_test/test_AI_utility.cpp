@@ -6,7 +6,8 @@
 #include "AI_utility.h"
 TEST(A, 1)
 {
-    readFile("../data/Car_train.csv");
+    Eigen::MatrixXd ret = readProject("../data/doc2vecTrainSet50D24000L.csv");
+    cout << ret.col(0) << endl;
 }
 int main(int argc, char *argv[])
 {
