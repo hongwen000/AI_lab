@@ -60,13 +60,13 @@ class RegressionTree {
     };
     Node* root;
     std::tuple<const matrix_view<double>, const matrix_view<double>> split_data(const matrix_view<double>& D, int a, double s);
-    void train_worker(Node* node, const ErrFunc_t& errFunc);
+    void train_worker(Node* node, const ErrFunc_t& errFunc, int depth, int level);
     std::string print_worker(Node* node, int n, char cn, const Vec<Str>&, string trace);
     double predict(const Eigen::Matrix<double, Eigen::Dynamic, 1>& X, predictOne);
     int prune_worker(Node* node);
 public:
     RegressionTree(const matrix_view<double>& _trainSet);
-    void train(const ErrFunc_t& errFunc);
+    void train(const ErrFunc_t& errFunc, int level);
     Vec<double> predict(const matrix_view<double>& X);
     double vaild(const matrix_view<double>& X);
     string print(const Vec<Str>& mp);
@@ -74,3 +74,18 @@ public:
 };
 
 Eigen::MatrixXd vectorizeData(const FileData_t & fileData, vector<map<string, int>>& mp);
+
+class BaggingRegressTree {
+    Vec<RegressionTree*> forests;
+    Vec<Vec<Eigen::Index>> forests_A;
+    matrix_view<double> trainSet;
+    int featureCount;
+    matrix_view<double> sample_D(const matrix_view<double>& trainSet);
+    Vec<Eigen::Index> sample_A(size_t n, size_t k);
+public:
+    BaggingRegressTree(const matrix_view<double>& _trainSet);
+    void train(const ErrFunc_t& errFunc, int M, int k, int maxLevel);
+    Vec<double> predict(const matrix_view<double>& X);
+    void prune();
+    double vaild(const matrix_view<double>& X);
+};

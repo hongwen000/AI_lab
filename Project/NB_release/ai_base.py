@@ -27,11 +27,9 @@ def list_multiprocess(lst: List, func: Callable[[List],List], n: int)-> List:
     ret = []
     for i in range(n):
         ret.append(p.apply_async(func, args=(lists[i],)))
-    print('Waiting for all subprocesses done...')
     p.close()
     p.join()
     last = []
     for i in ret:
         last += i.get()
-    print('All subprocesses done.')
     return last

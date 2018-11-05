@@ -1,6 +1,7 @@
 
 #include "regression_tree.h"
 #include "cmath"
+#include "random_lib.h"
 
 RegressionTree::RegressionTree(const matrix_view<double> &_trainSet)
     : trainSet(_trainSet)
@@ -29,14 +30,15 @@ std::tuple<const matrix_view<double>, const matrix_view<double>> RegressionTree:
     return std::tie(D_l, D_r);
 }
 
-void RegressionTree::train_worker(RegressionTree::Node *node, const ErrFunc_t &errFunc)
+void RegressionTree::train_worker(RegressionTree::Node *node, const ErrFunc_t &errFunc, int depth, int level)
 {
     auto* pA = &node->A;
     auto* pD = &node->D;
     auto D_Y = pD->row(-1);
     auto avg = D_Y.sum() / D_Y.size();
     auto err = errFunc(D_Y, avg);
-    if(err < RegressionArgs::err_tolerance)
+    //cout << "In level " << depth << endl;
+    if(err < RegressionArgs::err_tolerance || depth > level)
     {
         node->isLeaf = true;
         node->Y = avg;
@@ -49,9 +51,14 @@ void RegressionTree::train_worker(RegressionTree::Node *node, const ErrFunc_t &e
     {
         auto vals = pD->row(a);
         std::set<double> vals_set;
-        for(Eigen::Index i = 0; i < vals.size(); ++i)
+        auto n = vals.size();
+        //for(Eigen::Index i = 0; i < vals.size(); ++i)
+        //{
+        //    vals_set.insert(vals[i]);
+        //}
+        for(Eigen::Index i = 0; i < 10; ++i)
         {
-            vals_set.insert(vals[i]);
+            vals_set.insert(vals[RandLib::uniform_rand(0, n - 1)]);
         }
         for(auto s: vals_set)
         {
@@ -95,13 +102,13 @@ void RegressionTree::train_worker(RegressionTree::Node *node, const ErrFunc_t &e
     node->S = bestS;
     node->ch_l = new Node(D_l, *pA);
     node->ch_r = new Node(D_r, *pA);
-    train_worker(node->ch_l, errFunc);
-    train_worker(node->ch_r, errFunc);
+    train_worker(node->ch_l, errFunc, depth+1, level);
+    train_worker(node->ch_r, errFunc, depth+1, level);
 }
 
-void RegressionTree::train(const ErrFunc_t &errFunc)
+void RegressionTree::train(const ErrFunc_t &errFunc, int level)
 {
-    train_worker(root, errFunc);
+    train_worker(root, errFunc, 0, level);
 }
 
 double RegressionTree::predict(const Eigen::Matrix<double, Eigen::Dynamic, 1>& X, predictOne)
@@ -220,4 +227,107 @@ Eigen::MatrixXd vectorizeData(const FileData_t & fileData, vector<map<string, in
         cout << e.what() << endl;
     }
     return ret;
+}
+
+matrix_view<double> BaggingRegressTree::sample_D(const matrix_view<double>& trainSet)
+{
+    std::vector<Eigen::Index> v;
+    std::set<Eigen::Index> s;
+    auto n = trainSet.cols();
+    for(Eigen::Index i = 0; i < n; ++i)
+    {
+        s.insert(RandLib::uniform_rand(0, n - 1));
+    }
+    for(auto i : s)
+    {
+        v.push_back(i);
+    }
+    return matrix_view<double>(trainSet, v);
+}
+
+Vec<Eigen::Index> BaggingRegressTree::sample_A(size_t n, size_t k)
+{
+    Vec<Eigen::Index> ret;
+    if(k >= n)
+    {
+        return range(Eigen::Index(0), Eigen::Index(n));
+    }
+    std::set<Eigen::Index> sel;
+    while(sel.size() < k)
+    {
+        int s = RandLib::uniform_rand(0, n - 1);
+        sel.insert(s);
+    }
+
+    for(auto i : sel)
+    {
+        ret.push_back(i);
+    }
+    std::sort(ret.begin(), ret.end());
+
+    return ret;
+}
+
+BaggingRegressTree::BaggingRegressTree(const matrix_view<double>& _trainSet)
+    :trainSet(_trainSet)
+    {
+	    featureCount = (int)trainSet.rows() - 1;
+    }
+
+void BaggingRegressTree::train(const ErrFunc_t& errFunc, int M, int k, int maxLevel)
+{
+    for(int i = 0; i < M; ++i)
+    {
+        matrix_view<double> sub_D = sample_D(trainSet);
+        Vec<Eigen::Index> sub_A_idx = sample_A(featureCount, k);
+        sub_A_idx.push_back(-1);
+        forests_A.push_back(sub_A_idx);
+        sub_D.select_row(sub_A_idx);
+        RegressionTree* tree = new RegressionTree(sub_D);
+        forests.push_back(tree);
+        tree->train(errFunc, maxLevel);
+    }
+}
+
+Vec<double> BaggingRegressTree::predict(const matrix_view<double>& X)
+{
+    Vec<double> rets(X.cols(), 0.0);
+    Vec<double> ret(X.cols(), 0);
+    if(X.empty()) return ret;
+    for(size_t i = 0; i < forests.size(); ++i)
+    {
+        auto X_ = X;
+        X_.select_row(forests_A[i]);
+        auto oneret = forests[i]->predict(X_);
+        for(size_t i = 0; i < oneret.size(); ++i)
+        {
+            rets[i] += oneret[i];
+        }
+    }
+    for(size_t i = 0; i < rets.size(); ++i)
+    {
+        double n = forests.size();
+        ret[i] = rets[i] / n;
+        //if(rets[i] > (forests.size() / 2.0))
+            //ret[i] = 1;
+    }
+    return ret;
+}
+
+double BaggingRegressTree::vaild(const matrix_view<double>& X)
+{
+    auto ret = predict(X);
+    auto n = X.cols();
+    for(auto& i:ret)
+    {
+        if(i >= 0.5) i = 1;
+        else i = 0;
+    }
+    double correct = 0;
+    for(Eigen::Index i = 0; i < n; ++i)
+    {
+        if(X(-1, i) == ret[i])
+            correct++;
+    }
+    return correct / n;
 }
