@@ -1,0 +1,9 @@
+[submodule "lab6/Maze"]
+	path = lab6/Maze
+	url = https://gitee.com/hongwen000/Maze.git
+[submodule "lab7/Puzzle"]
+	path = lab7/Puzzle
+	url = https://gitee.com/hongwen000/Puzzle.git
+[submodule "lab8/Reversi"]
+	path = lab8/Reversi
+	url = https://github.com/hongwen000/Reversi.git
