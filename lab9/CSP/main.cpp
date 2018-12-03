@@ -10,28 +10,30 @@
 
 using namespace std;
 
-stringstream ss;
-#define cout ss
+//stringstream ss;
+//#define cout ss
 
-using State = std::vector<int>;
+using State = int*;
 
-void print(const State& X)
+void inline print(State X)
 {
     return;
-    for(auto& i: X)
+    for(int i = 0; i < GAMESCALE; ++i)
     {
-        printf("%d ,", i);
+        printf("%d ,", X[i]);
     }
     printf("\n");
 }
 
-using domain_t = std::array<std::array<int, GAMESCALE>, GAMESCALE>;
+using domain_t = int[GAMESCALE][GAMESCALE];
 domain_t domains;
+int X[GAMESCALE];
 
-void initDomain()
+void init()
 {
     for(int i = 0; i < GAMESCALE; ++i)
     {
+        X[i] = -1;
         for(int j = 0; j < GAMESCALE; ++j)
         {
             domains[i][j] = j;
@@ -39,8 +41,6 @@ void initDomain()
     }
 }
 
-std::list<int> V;
-State X(GAMESCALE, -1);
 
 auto col_constraint =  [](const auto& p, auto v, auto i){
 //    cout << "col constraint" << endl;
@@ -66,7 +66,7 @@ auto dia_constraint = [](const auto& p, auto v, auto i){
 
 using checkFunc_t = std::function<bool(const State& p, int v, int i)>;
 vector<checkFunc_t> Constraints = {col_constraint, dia_constraint};
-bool is_domain_empty(const std::array<int, GAMESCALE>& domain)
+inline bool is_domain_empty(int * domain)
 {
     for(int i = 0; i < GAMESCALE; ++i)
         if(domain[i] >= 0)
@@ -74,28 +74,43 @@ bool is_domain_empty(const std::array<int, GAMESCALE>& domain)
     return true;
 }
 
-bool fc(State&p, int level)
+bool fc2(int level, int v, int i)
 {
-    for(auto v: V)
+    for(int j = 0; j < GAMESCALE; ++j)
     {
-        int pv = p[v];
-        for(int i = 0; i < GAMESCALE; ++i)
+        if(domains[v][j] >= 0) domains[v][j] = -level;
+        if(domains[j][i] >= 0) domains[j][i] = -level;
+        if(v+j < GAMESCALE)
         {
-            if(domains[v][i] < 0) continue;
-            for(const auto& c: Constraints)
-            {
-                p[v] = i;
-//                cout << "Checking variable " << v << " assign " << i << " with ";
-                if(!c(p, v, i))
-                {
-//                    cout << "deleted" << endl;
-                    domains[v][i] = -level;
-                    break;
-                }
-            }
+            if(i + j < GAMESCALE && domains[v+j][i+j] >= 0) domains[v+j][i+j] = -level;
+            if(i - j >= 0 && domains[v+j][i-j] >= 0) domains[v+j][i-j] = -level;
         }
-        p[v] = pv;
-        if(is_domain_empty(domains[v]))
+    }
+    for(int i = v + 1; i < GAMESCALE; ++i)
+    {
+        if(is_domain_empty(domains[i]))
+        {
+//            cout << "DWO happend at variable " << v << endl;
+            return true;
+        }
+    }
+    return false;
+}
+bool fc(int level, int v, int i)
+{
+    for(int j = 0; j < GAMESCALE; ++j)
+    {
+        for(int k = 0; k < GAMESCALE; ++k)
+        {
+            if(domains[j][k] < 0)
+                continue;
+            if(j == v || k == i || abs(j - v) == abs(k - i))
+                domains[j][k] = -level;
+        }
+    }
+    for(int i = v + 1; i < GAMESCALE; ++i)
+    {
+        if(is_domain_empty(domains[i]))
         {
 //            cout << "DWO happend at variable " << v << endl;
             return true;
@@ -106,14 +121,13 @@ bool fc(State&p, int level)
 
 void BT(int level)
 {
-    if(V.empty())
+    auto v = level - 1;
+    if(v == GAMESCALE)
     {
         print(X);
 //        exit(0);
         return;
     }
-    auto v = V.front();
-    V.pop_front();
     for(auto i: domains[v])
     {
         X[v] = i;
@@ -131,27 +145,25 @@ void BT(int level)
             BT(level+1);
         }
     }
-    V.push_front(v);
     X[v] = -1;
 }
 
 void FC(int level)
 {
 //    cout << " ------- In FC level --------" << level << endl;
-    if(V.empty())
+    auto v = level - 1;
+    if(v == GAMESCALE)
     {
         print(X);
 //        exit(0);
         return;
     }
-    auto v = V.front();
-    V.pop_front();
     for(int i = 0; i < GAMESCALE; ++i)
     {
 //        cout << "---> Testing variable " << v << " with assign " << i << endl;
         if(domains[v][i] < 0) continue;
         X[v] = i;
-        auto DWO = fc(X, level);
+        auto DWO = fc(level, v, i);
         if(!DWO)
         {
             FC(level+1);
@@ -168,24 +180,18 @@ void FC(int level)
         }
 //        cout << "Restore over" << endl;
     }
-    V.push_front(v);
     X[v] = -1;
 }
 
 int main()
 {
-    initDomain();
-    for(int i = 0; i < GAMESCALE; ++i)
-        V.push_back(i);
+
+    init();
     auto s = chrono::steady_clock::now();
     BT(1);
     auto dis = chrono::steady_clock::now() - s;
     printf("%ld\n", dis.count() / 1000000);
-
-    V.clear();
-    initDomain();
-    for(int i = 0; i < GAMESCALE; ++i)
-        V.push_back(i);
+    init();
     s = chrono::steady_clock::now();
     FC(1);
     dis = chrono::steady_clock::now() - s;
