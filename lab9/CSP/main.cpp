@@ -3,7 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <chrono>
-#define GAMESCALE 19
+#define GAMESCALE 8
 
 using namespace std;
 
@@ -96,13 +96,13 @@ bool fc2(int level, int v, int i)
 }
 bool fc(int level, int v, int i)
 {
-    for(int j = 0; j < GAMESCALE; ++j)
+    for(int j = v + 1; j < GAMESCALE; ++j)
     {
         for(int k = 0; k < GAMESCALE; ++k)
         {
             if(domains[j][k] < 0)
                 continue;
-            if(j == v || k == i || abs(j - v) == abs(k - i))
+            if(k == i || abs(j - v) == abs(k - i))
                 domains[j][k] = -level;
         }
     }
@@ -185,7 +185,7 @@ int main()
 {
     init();
     auto s = chrono::steady_clock::now();
-    BT(1);
+//    BT(1);
     auto dis = chrono::steady_clock::now() - s;
     init();
     auto s2 = chrono::steady_clock::now();
