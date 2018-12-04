@@ -43,7 +43,6 @@ void init()
 
 
 auto col_constraint =  [](const auto& p, auto v, auto i){
-//    cout << "col constraint" << endl;
     for(int v2 = 0; v2 < GAMESCALE; ++v2)
     {
         int i2 = p[v2];
@@ -54,7 +53,6 @@ auto col_constraint =  [](const auto& p, auto v, auto i){
 };
 
 auto dia_constraint = [](const auto& p, auto v, auto i){
-//    cout << "dia constraint" << endl;
     for(int v2 = 0; v2 < GAMESCALE; ++v2)
     {
         auto i2 = p[v2];
