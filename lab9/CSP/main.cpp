@@ -1,12 +1,9 @@
 #include <iostream>
-#include <array>
-#include <set>
-#include <list>
 #include <functional>
 #include <vector>
 #include <sstream>
 #include <chrono>
-#define GAMESCALE 14
+#define GAMESCALE 19
 
 using namespace std;
 
@@ -15,8 +12,10 @@ using namespace std;
 
 using State = int*;
 
+int cnt = 0;
 void inline print(State X)
 {
+    cnt++;
     return;
     for(int i = 0; i < GAMESCALE; ++i)
     {
@@ -31,6 +30,7 @@ int X[GAMESCALE];
 
 void init()
 {
+    cnt = 0;
     for(int i = 0; i < GAMESCALE; ++i)
     {
         X[i] = -1;
@@ -183,16 +183,15 @@ void FC(int level)
 
 int main()
 {
-
     init();
     auto s = chrono::steady_clock::now();
     BT(1);
     auto dis = chrono::steady_clock::now() - s;
-    printf("%ld\n", dis.count() / 1000000);
     init();
-    s = chrono::steady_clock::now();
+    auto s2 = chrono::steady_clock::now();
     FC(1);
-    dis = chrono::steady_clock::now() - s;
-    printf("%ld\n", dis.count() / 1000000);
+    auto dis2 = chrono::steady_clock::now() - s2;
+    int i = GAMESCALE;
+    printf("%d, %ld, %ld, %d\n", i, dis.count() / 1000, dis2.count() / 1000, cnt);
     return 0;
 }
