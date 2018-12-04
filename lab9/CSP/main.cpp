@@ -98,14 +98,19 @@ bool fc(int level, int v, int i)
 {
     for(int j = v + 1; j < GAMESCALE; ++j)
     {
+        bool dwo = true;
         for(int k = 0; k < GAMESCALE; ++k)
         {
             if(domains[j][k] < 0)
                 continue;
             if(k == i || abs(j - v) == abs(k - i))
                 domains[j][k] = -level;
+            dwo = false;
         }
+        if(dwo)
+            return true;
     }
+    return false;
     for(int i = v + 1; i < GAMESCALE; ++i)
     {
         if(is_domain_empty(domains[i]))
