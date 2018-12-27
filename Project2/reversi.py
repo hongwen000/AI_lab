@@ -6,7 +6,7 @@
 '''
 
 import json
-import numpy
+import numpy as np
 import random
 
 EMPTY = 0
@@ -37,9 +37,7 @@ def place(board, x, y, color):
                 board[i][j] = color
     return valid
 
-# 随机产生决策
-def randplace(board, color):
-    x = y = -1
+def get_actions(board, color):
     moves = []
     for i in range(8):
         for j in range(8):
@@ -47,39 +45,23 @@ def randplace(board, color):
                 newBoard = board.copy()
                 if place(newBoard, i, j, color):
                     moves.append((i, j))
+    return moves
+
+# 随机产生决策
+def randplace(board, color):
+    x = y = -1
+    moves = get_actions(board, color)
     if len(moves) == 0:
         return -1, -1
     return random.choice(moves)
 
 # 处理输入，还原棋盘
 def initBoard():
-    fullInput = json.loads(input())
-    requests = fullInput["requests"]
-    responses = fullInput["responses"]
-    board = numpy.zeros((8, 8), dtype=numpy.int)
+    board = np.zeros((8, 8), dtype=np.int)
     board[3][4] = board[4][3] = 1
     board[3][3] = board[4][4] = -1
     myColor = 1
-    if requests[0]["x"] >= 0:
-        myColor = -1
-        place(board, requests[0]["x"], requests[0]["y"], -myColor)
-    turn = len(responses)
-    for i in range(turn):
-        place(board, responses[i]["x"], responses[i]["y"], myColor)
-        place(board, requests[i + 1]["x"], requests[i + 1]["y"], -myColor)
     return board, myColor
-
-from copy import deepcopy
-checkDirection= [
-    [-1, 0],
-    [-1, 1],
-    [ 0, 1],
-    [ 1, 1],
-    [ 1, 0],
-    [1, -1],
-    [0, -1],
-    [-1,-1],
-]
 
 def inBoundary(x: int, y: int)->bool:
     return (x >= 0) and (x < 8) and (y >= 0) and (y < 8)
@@ -102,65 +84,22 @@ def diffColorChess(c1: int, c2: int):
         return True
     return False
 
-__id2 = 0
-__flag = False
-__this_d = 0
-def getAvail(state: bytearray, color: int):
-    global checkDirection
-    ret = deepcopy(state)
-    for i in range(len(ret)):
-        ret[i] = 0
-    for i in range(len(ret)):
-        if state[i] != EMPTY:
-            ret[i] = 0
-            continue
-        x, y = getXY(i)
-        for d in range(8):
-            global __this_d
-            __this_d = 0
-            dx, dy = checkDirection[d]
-            x2 = x + dx
-            y2 = y + dy
-            global __id2
-            global __flag
-            __flag = False
-            __id2 = getID(x2, y2)
-            if(inBoundary(x2, y2) and diffColorChess(color, state[__id2])):
-                __this_d += 1
-                x2 += dx
-                y2 += dy
-                while(inBoundary(x2, y2)):
-                    __id2 = getID(x2, y2)
-                    if sameColorChess(color, state[__id2]):
-                        __flag = True
-                        break
-                    elif diffColorChess(color, state[__id2]):
-                        __this_d += 1
-                    elif state[__id2] == EMPTY:
-                        break
-                    x2 += dx
-                    y2 += dy
+grid = np.array([[ 1, 1, 1, 1, 0, 0, 0, 0],
+                 [ 1,-1, 1, 1, 1,-1, 0, 0],
+                 [ 1,-1, 1, 1, 1,-1,-1,-1],
+                 [ 1,-1, 1, 1, 1,-1,-1,-1],
+                 [ 1,-1,-1, 1, 1, 1,-1,-1],
+                 [ 1,-1,-1, 1, 1, 1,-1,-1],
+                 [ 1, 0, 1, 1, 1, 1, 0, 0],
+                 [ 1, 1, 1, 1, 1, 1, 0, 0]])
 
-                if not __flag:
-                    __this_d = 0
-            ret[i] += __this_d
-    return ret
 
-def AI(state: bytearray, chesscolor: int):
-    r = random.Random()
-    r.seed()
-    avi = getAvail(state, chesscolor)
-    possibleMove = []
-    for i in range(64):
-        if avi[i] > 0:
-            possibleMove.append(i)
-    if len(possibleMove) == 0:
-        return -1
-    n = int((r.random() * 64) % len(possibleMove))
-    return possibleMove[n]
 
-board, myColor = initBoard()
-x, y = randplace(board, myColor)
-print(json.dumps({"response": {"x": x, "y": y}}))
+# board, myColor = initBoard()
+# x, y = randplace(board, myColor)
+# print(json.dumps({"response": {"x": x, "y": y}}))
 
+
+for i in range(10000):
+    get_actions(grid, BLACK)
 
