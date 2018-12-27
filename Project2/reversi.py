@@ -6,12 +6,10 @@
 '''
 
 import json
+import numpy
 import numpy as np
 import random
-
-EMPTY = 0
-BLACK = 1
-WHITE = -1
+import fast_place
 
 DIR = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)) # 方向向量
 
@@ -43,63 +41,107 @@ def get_actions(board, color):
         for j in range(8):
             if board[i][j] == 0:
                 newBoard = board.copy()
-                if place(newBoard, i, j, color):
+                if fast_place.place(newBoard, i, j, color):
                     moves.append((i, j))
     return moves
 
 # 随机产生决策
-def randplace(board, color):
+def rand_place(board, color):
     x = y = -1
-    moves = get_actions(board, color)
+    moves = fast_place.get_actions(board, color)
     if len(moves) == 0:
         return -1, -1
     return random.choice(moves)
 
 # 处理输入，还原棋盘
-def initBoard():
-    board = np.zeros((8, 8), dtype=np.int)
+def init_board():
+    board = numpy.zeros((8, 8), dtype=numpy.int)
     board[3][4] = board[4][3] = 1
     board[3][3] = board[4][4] = -1
     myColor = 1
     return board, myColor
 
-def inBoundary(x: int, y: int)->bool:
-    return (x >= 0) and (x < 8) and (y >= 0) and (y < 8)
-def getXY(i):
-    return int(i / 8), i % 8
-def getID(x, y):
-    return x * 8 + y
+def print_chess(n):
+    if n == 1 :
+        return '•'
+    elif n == -1:
+        return '○'
+    else:
+        return ' '
 
-def sameColorChess(c1: int, c2: int):
-    if(c1 == EMPTY or c2 == EMPTY):
-        return False
-    if (c1 == c2):
-        return True
-    return False
+def print_game(board, x, y, color, start = False):
+    return
+    black_score = np.sum(board == 1)
+    white_score = np.sum(board == -1)
+    if black_score > white_score:
+        result = 1
+    elif white_score > black_score:
+        result = -1
+    else:
+        result = 0
+    if (color == 1):
+        str_color = 'black'
+    elif (color == -1):
+        str_color = 'white'
+    else:
+        raise NotImplementedError
+    if start:
+        print("Game start")
+    else:
+        if (x < 0):
+            print("[{}] can't not play !".format(str_color))
+        else:
+            print("[{}] put the chess piece in [( {} , {})] !!".format(str_color, x, y))
+    moves = fast_place.get_actions(board, -color)
+    print('------------------------------------')
+    print('|   |', end='')
+    for j in range(8):
+        print(' {} |'.format(str(int(j))), end='')
+    print('\n------------------------------------')
+    for i in range(8):
+        print('| {} |'.format(str(int(i))), end='')
+        for j in range(8):
+            if (i, j) in moves:
+                print(' {} |'.format('+'), end='')
+            else:
+                print(' {} |'.format(print_chess(board[i][j])), end='')
 
-def diffColorChess(c1: int, c2: int):
-    if(c1 == EMPTY or c2 == EMPTY):
-        return False
-    if (c1 != c2):
-        return True
-    return False
+        print('\n------------------------------------')
 
-grid = np.array([[ 1, 1, 1, 1, 0, 0, 0, 0],
-                 [ 1,-1, 1, 1, 1,-1, 0, 0],
-                 [ 1,-1, 1, 1, 1,-1,-1,-1],
-                 [ 1,-1, 1, 1, 1,-1,-1,-1],
-                 [ 1,-1,-1, 1, 1, 1,-1,-1],
-                 [ 1,-1,-1, 1, 1, 1,-1,-1],
-                 [ 1, 0, 1, 1, 1, 1, 0, 0],
-                 [ 1, 1, 1, 1, 1, 1, 0, 0]])
+    print("[black : {}]".format(black_score))
+    print("[white : {}]".format(white_score))
+    print('\n')
+    return result, black_score + white_score
 
-
-
-# board, myColor = initBoard()
-# x, y = randplace(board, myColor)
-# print(json.dumps({"response": {"x": x, "y": y}}))
+def print_winner(board):
+    black_score = np.sum(board == 1)
+    white_score = np.sum(board == -1)
+    if black_score > white_score:
+        print("black wins")
+    elif black_score < white_score:
+        print("white wins")
+    else:
+        print("draw")
 
 
+def pk():
+    board, color = init_board()
+    print_game(board, -1, -1, -1, start=True)
+    while True:
+        x, y = rand_place(board, color)
+        if not x == -1:
+            place(board, x, y, color)
+            print_game(board, x, y, color)
+            color = -color
+            continue
+        else:
+            x, y = rand_place(board, color)
+            if not x == -1:
+                place(board, x, y, color)
+                print_game(board, x, y, color)
+                color = -color
+                continue
+            else:
+                break
 for i in range(10000):
-    get_actions(grid, BLACK)
-
+    pk()
