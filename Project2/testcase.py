@@ -23,7 +23,7 @@ ret = 0
 s = time.monotonic_ns()
 for i in range(1000000):
     # ret = np.tensordot(values, grid, axes=((0,1),(0,1)))
-    tmp = values * grid;
+    tmp = values * grid
     ret = np.sum(tmp)
 e = time.monotonic_ns()
 print(e - s)
