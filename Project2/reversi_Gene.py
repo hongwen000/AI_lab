@@ -10,7 +10,7 @@ import numpy
 import numpy as np
 import random
 import fast_place
-import MCST
+import MCST.MCST as MCST
 from config import *
 
 
