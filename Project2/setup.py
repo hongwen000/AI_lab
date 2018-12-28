@@ -14,3 +14,15 @@ ext_modules = [
 
 setup(name='Hello world app',
       ext_modules=cythonize(ext_modules))
+
+# ext_modules2 = [
+#     Extension(
+#         "reversi",
+#         ["reversi.pyx"],
+#         extra_compile_args=['-fopenmp'],
+#         extra_link_args=['-fopenmp'],
+#     )
+# ]
+#
+# setup(name='reversi',
+#       ext_modules=cythonize(ext_modules2))

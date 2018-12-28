@@ -10,6 +10,9 @@ import numpy
 import numpy as np
 import random
 import fast_place
+import MCST
+from config import *
+
 
 DIR = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)) # 方向向量
 
@@ -45,13 +48,6 @@ def get_actions(board, color):
                     moves.append((i, j))
     return moves
 
-# 随机产生决策
-def rand_place(board, color):
-    x = y = -1
-    moves = fast_place.get_actions(board, color)
-    if len(moves) == 0:
-        return -1, -1
-    return random.choice(moves)
 
 # 处理输入，还原棋盘
 def init_board():
@@ -69,8 +65,24 @@ def print_chess(n):
     else:
         return ' '
 
+def print_board(board, color):
+    moves = fast_place.get_actions(board, -color)
+    print('------------------------------------')
+    print('|   |', end='')
+    for j in range(8):
+        print(' {} |'.format(str(int(j))), end='')
+    print('\n------------------------------------')
+    for i in range(8):
+        print('| {} |'.format(str(int(i))), end='')
+        for j in range(8):
+            if (i, j) in moves:
+                print(' {} |'.format('+'), end='')
+            else:
+                print(' {} |'.format(print_chess(board[i][j])), end='')
+
+        print('\n------------------------------------')
+
 def print_game(board, x, y, color, start = False):
-    return
     black_score = np.sum(board == 1)
     white_score = np.sum(board == -1)
     if black_score > white_score:
@@ -92,56 +104,59 @@ def print_game(board, x, y, color, start = False):
             print("[{}] can't not play !".format(str_color))
         else:
             print("[{}] put the chess piece in [( {} , {})] !!".format(str_color, x, y))
-    moves = fast_place.get_actions(board, -color)
-    print('------------------------------------')
-    print('|   |', end='')
-    for j in range(8):
-        print(' {} |'.format(str(int(j))), end='')
-    print('\n------------------------------------')
-    for i in range(8):
-        print('| {} |'.format(str(int(i))), end='')
-        for j in range(8):
-            if (i, j) in moves:
-                print(' {} |'.format('+'), end='')
-            else:
-                print(' {} |'.format(print_chess(board[i][j])), end='')
-
-        print('\n------------------------------------')
-
+    print_board(board, color)
     print("[black : {}]".format(black_score))
     print("[white : {}]".format(white_score))
     print('\n')
     return result, black_score + white_score
 
-def print_winner(board):
+def calc_winner(board):
     black_score = np.sum(board == 1)
     white_score = np.sum(board == -1)
     if black_score > white_score:
-        print("black wins")
+        if(define_debug):
+            print("black wins")
+        return 1
     elif black_score < white_score:
-        print("white wins")
+        if(define_debug):
+            print("white wins")
+        return -1
     else:
-        print("draw")
+        if(define_debug):
+            print("draw")
+        return 0
 
 
-def pk():
+def pk(N):
     board, color = init_board()
-    print_game(board, -1, -1, -1, start=True)
+    if(define_debug):
+        print_game(board, -1, -1, -1, start=True)
     while True:
-        x, y = rand_place(board, color)
+        if (color == WHITE):
+            x, y = fast_place.rand_place(board, color)
+        else:
+            root = MCST.Node(board, color, None)
+            x, y = MCST.MCTS(root, N)
         if not x == -1:
-            place(board, x, y, color)
-            print_game(board, x, y, color)
+            fast_place.place(board, x, y, color)
+            if(define_debug):
+                print_game(board, x, y, color)
             color = -color
             continue
         else:
-            x, y = rand_place(board, color)
+            if (color == WHITE):
+                x, y = fast_place.rand_place(board, color)
+            else:
+                root = MCST.Node(board, color, None)
+                x, y = MCST.MCTS(root, N)
             if not x == -1:
-                place(board, x, y, color)
-                print_game(board, x, y, color)
+                fast_place.place(board, x, y, color)
+                if(define_debug):
+                    print_game(board, x, y, color)
                 color = -color
                 continue
             else:
+                calc_winner(board)
                 break
-for i in range(10000):
-    pk()
+
+pk(3000)
