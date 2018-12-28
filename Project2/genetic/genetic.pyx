@@ -1,9 +1,9 @@
 from typing import *
-def random_gene(N: int):
+cdef random_gene(N: int):
     # TODO
     return [[]]
 
-def end_evolution(group)->bool:
+cdef end_evolution(group)->bool:
     # TODO
     return False
 
@@ -11,23 +11,23 @@ def calc_fit(gene)->float:
     # TODO
     return 0
 
-def select_gene(group, fitness: List[float]):
+cdef select_gene(group, fitness: List[float]):
     # TODO
     return []
 
-def select_parents(group, fitness: List[float]):
+cdef select_parents(group, fitness: List[float]):
     # TODO
     return [],[]
 
-def cross_gene(parents):
+cdef cross_gene(parents):
     # TODO
     return []
 
-def mutate_gene(gene, R: float):
+cdef mutate_gene(gene, R: float):
     # TODO
     return []
 
-def select_best(group):
+cdef select_best(group):
     # TODO
     return []
 

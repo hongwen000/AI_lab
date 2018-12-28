@@ -67,3 +67,6 @@ build
 bchs
 handon
 */16337237_code_v2.zip
+Project2/*.c
+Project2/*.so
+Project2/*/build
