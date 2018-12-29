@@ -1,336 +1,383 @@
+#include <cstring>
+#include <cfloat>
+#include <iostream>
+#include <random>
+#include "algorithm"
 #include "reversi.h"
 
-const int checkDirection[8][2] = {
-    {-1, 0},
-    {-1, 1},
-    { 0, 1},
-    { 1, 1},
-    { 1, 0},
-    {1, -1},
-    {0, -1},
-    {-1,-1},
+struct action
+{
+    int x = -1;
+    int y = -1;
 };
-bool inBoundary(int x, int y)
-{
-    return (x >= 0) && (x < GAMESCALE) && (y >= 0) && (y < GAMESCALE);
-}
 
-pair<int, int> getXY(int id)
-{
-    return {id / GAMESCALE, id % GAMESCALE};
-}
 
-int getID(int x, int y)
-{
-    return x * GAMESCALE + y;
-}
+int dir[8][2] = {
+        {-1, 0},
+        {-1, 1},
+        { 0, 1},
+        { 1, 1},
+        { 1, 0},
+        {1, -1},
+        {0, -1},
+        {-1,-1},};
 
-State getNextState(const State &s, int id, int color)
+static bool check(int board[8][8], int x, int y, int color)
 {
-    auto ret = s;
-
-    auto iid = getXY(id);
-    int x = iid.first;
-    int y = iid.second;
-//    auto [x, y] = getXY(id);
-    for(int d = 0; d < 8; ++d)
+    int d, i, j, cnt;
+    if (board[x][y] != 0)
+        return false;
+    for (d = 0; d < 8; d++)
     {
-        int i = x;
-        int j = y;
-        int fx = -1;
-        int fy = -1;
-//        auto dd = checkDirection[d];
-        auto dx = checkDirection[d][0];
-        auto dy = checkDirection[d][1];
-        while(inBoundary(i += dx, j += dy))
-        {
-            if(color == s[getID(i,j)])
-            {
-                fx = i;
-                fy = j;
-            }
-            if(s[getID(i,j)] == EMPTY)
-            {
+        i = x;
+        j = y;
+        cnt = 0;
+        while (true) {
+            i += dir[d][0];
+            j += dir[d][1];
+            if (i < 0 || i > 7 || j < 0 || j > 7) {
+                cnt = 0;
                 break;
             }
-        }
-        if(fx != -1 && fy != -1)
-        {
-            i = x;
-            j = y;
-            while(inBoundary(i += dx, j += dy))
+            if (board[i][j] == -color)
+                cnt++;
+            else if (board[i][j] == 0)
             {
-                if(i == fx && j == fy)
+                cnt = 0;
+                break;
+            }
+                // ????????
+            else
+                break;
+        }
+        if (cnt != 0)
+            return true;
+    }
+    return false;
+}
+
+static vector<action> get_actions(int board[8][8], int color) {
+    vector<action> ret;
+    for(int i = 0; i < 8; ++i)
+    {
+        for(int j = 0; j < 8; ++j)
+        {
+            if(check(board, i,j,color))
+            {
+                ret.push_back({i,j});
+            }
+        }
+    }
+    return ret;
+}
+
+bool place(int board[8][8], int x, int y, int color)
+{
+//    for(int i = 0; i < 8; ++i)
+//    {
+//        for(int j = 0; j < 8; ++j)
+//            cout << board[i][j] << " ";
+//        cout << endl;
+//    }
+//    cout << endl;
+    if(x < 0) return false;
+    board[x][y] = color;
+    bool valid = false;
+    for (auto &d : dir) {
+        int i = x + d[0];
+        int j = y + d[1];
+        while(0 <= i && i < 8 && 0 <= j && j < 8 && board[i][j] == -color)
+        {
+            i+= d[0];
+            j+= d[1];
+        }
+        if(0 <= i && i < 8 && 0 <= j && j < 8 && board[i][j] == color)
+        {
+            while(true)
+            {
+                i-= d[0];
+                j-= d[1];
+                // ??????????????
+                if(i == x && j == y)
                     break;
-                if(s[getID(i,j)] != EMPTY)
-                {
-                    ret[getID(i,j)] = (uint8_t)color;
-                }
+                valid = true;
+//                cout << board[i][j] << endl;
+                board[i][j] = color;
             }
         }
     }
-    return ret;
+    return valid;
 }
+//static const int values[8][8] =
+//{{ 30, -25, 10, 5, 5, 10, -25,  30,},
+//{-25, -25,  1, 1, 1,  1, -25, -25,},
+//{ 10,   1,  5, 2, 2,  5,   1,  10,},
+//{  5,   1,  2, 1, 1,  2,   1,   5,},
+//{  5,   1,  2, 1, 1,  2,   1,   5,},
+//{ 10,   1,  5, 2, 2,  5,   1,  10,},
+//{-25, -25,  1, 1, 1,  1, -25, -25,},
+//{ 30, -25, 10, 5, 5, 10, -25,  30,},};
 
-bool sameColorChess(int c1, int c2)
-{
-    if(c1 == EMPTY || c2 == EMPTY)
-        return false;
-    if(c1 == c2)
-        return true;
-    return false;
-}
 
-bool diffColorChess(int c1, int c2)
+
+static const int gene_map[8][8] =
+        {{ 0, 1, 3, 5, 5, 3, 1, 0},
+         { 1, 2, 4, 7, 7, 4, 2, 1},
+         { 3, 4, 6, 8, 8, 6, 4, 3},
+         { 5, 7, 8, 9, 9, 8, 7, 5},
+         { 5, 7, 8, 9, 9, 8, 7, 5},
+         { 3, 4, 6, 8, 8, 6, 4, 3},
+         { 1, 2, 4, 7, 7, 4, 2, 1},
+         { 0, 1, 3, 5, 5, 3, 1, 0}};
+
+void explain(double values[8][8], const chrom_t& gene)
 {
-    if(c1 == EMPTY || c2 == EMPTY)
-        return false;
-    if(c1 != c2)
-        return true;
-    return false;
-}
-std::array<int, GAMESCALE * GAMESCALE> getAvail(const State& s, int color)
-{
-    std::array<int, GAMESCALE * GAMESCALE> ret;
-    for(auto & i: ret) i = 0;
-    for(int id = 0; id < GAMESCALE * GAMESCALE; ++id)
+    for(int i = 0; i < 8; ++i)
     {
-        if(s[id] != EMPTY)
+        for(int j = 0; j < 8; ++j)
         {
-            ret[id] = 0;
-            continue;
-        }
-        auto iid = getXY(id);
-        int x = iid.first;
-        int y = iid.second;
-//        auto [x, y] = getXY(id);
-        for(int d = 0; d < 8; ++d)
-        {
-            int this_d = 0;
-//            auto [dx, dy] = checkDirection[d];
-            auto dx = checkDirection[d][0];
-            auto dy = checkDirection[d][1];
-            int x2 = x + dx;
-            int y2 = y + dy;
-            bool flag = false;
-            auto id2 = getID(x2, y2);
-            if(inBoundary(x2, y2) && diffColorChess(color, s[id2]))
-            {
-                this_d += 1;
-                while(inBoundary(x2 += dx, y2 += dy))
-                {
-                    id2 = getID(x2, y2);
-                    if(sameColorChess(color, s[id2]))
-                    {
-                        flag = true;
-                        break;
-                    }
-                    else if(diffColorChess(color, s[id2]))
-                    {
-                        this_d++;
-                    }
-                    else if(s[id2] == EMPTY)
-                    {
-                        break;
-                    }
-                }
-                if(!flag) this_d = 0;
-            }
-            ret[id] += this_d;
+            values[i][j] = gene[gene_map[i][j]];
         }
     }
-    return ret;
 }
 
-static const int values[8][8] =
-{{ 30, -25, 10, 5, 5, 10, -25,  30,},
-{-25, -25,  1, 1, 1,  1, -25, -25,},
-{ 10,   1,  5, 2, 2,  5,   1,  10,},
-{  5,   1,  2, 1, 1,  2,   1,   5,},
-{  5,   1,  2, 1, 1,  2,   1,   5,},
-{ 10,   1,  5, 2, 2,  5,   1,  10,},
-{-25, -25,  1, 1, 1,  1, -25, -25,},
-{ 30, -25, 10, 5, 5, 10, -25,  30,},};
-
-static const int * pvalues = ((const int *)values);
-
-
-// 评估函数，s是要评估的状态，color是当前要落子的棋子颜色
-int positionalValue(const State& s, int color)
+double heru(int board[8][8], int color, const chrom_t& gene, double value1[8][8], double value2[8][8])
 {
-    // 黑子数量
     int bcnt = 0;
-    // 白子数量
     int wcnt = 0;
-    // 空白位置数量
-    int ecnt = 0;
-    // 仅用于8X8的黑白棋
-    if(GAMESCALE != 8) throw;
-    // 效用值
-    int ret = 0;
-    // 获取当前可行动的位置
-    auto avi = getAvail(s, color);
-    // 移动性
-    int mobility = 0;
-    // 如果某个位置可落子数大于0，移动性+1
-    for(const auto& i : avi) if(i)mobility++;
-    // 遍历所有位置, 依据价值表计算局面的价值
-    for(int i = 0; i < 64; ++i)
+    auto avi = get_actions(board, color);
+    auto coner = board[0][0] + board[7][7] + board[0][7] + board[7][0];
+    auto bad_coner = board[0][1] + board[0][6] + board[7][1] + board[7][6] + \
+                     board[1][1] + board[1][6] + board[6][1] + board[6][7] + \
+                     board[1][0] + board[6][0] + board[1][7] + board[6][7];
+    double mat = 0;
+    double(* pv)[8];
+    if(color == 1) pv = value1;
+    else pv = value2;
+    for(int i = 0; i < 8; ++i)
     {
-        // 若为空,价值为0
-        if(s[i] == EMPTY)
+        for(int j = 0; j < 8; ++j)
         {
-            ecnt++;
-            continue;
+            mat += board[i][j] * pv[i][j];
         }
-        // 若为黑子，加上价值
-        else if(s[i] == BLACK)
+    }
+    for(int i = 0; i < 8; ++i)
+    {
+        for(int j = 0; j < 8; ++j)
         {
-            ret += *(pvalues + i);
-            bcnt++;
+            if(board[i][j] == 1) bcnt++;
+            else if(board[i][j] == 0) wcnt++;
         }
-        // 若为白子，减去价值
+    }
+    auto g10 = color == BLACK ? (double)bcnt / (bcnt + wcnt) : -(double)wcnt / (bcnt + wcnt);
+    return mat + gene[10] * g10 + gene[11] * coner  + gene[12] * bad_coner;
+}
+
+double AlphaBeta(int board[8][8], int color, int limit,
+                 double alpha, double beta, action & bestMove, const chrom_t gene[2], double values1[8][8], double values2[8][8])
+{
+    if(limit == 0) return heru(board, color, gene[color == WHITE], values1, values2);
+    auto avil = get_actions(board, color);
+    action lbestMove;
+    //TODO: WARNING HERE
+    int ns[8][8];
+    if(avil.empty())
+    {
+        bestMove.x = -1;
+        bestMove.y = -1;
+        auto avil2 = get_actions(board, -color);
+        if(avil2.empty())
+            return heru(board, color, gene[color == WHITE], values1, values2);
         else
         {
-            ret -= *(pvalues + i);
-            wcnt++;
+            memcpy(ns, board, 64 * sizeof(int));
+            return AlphaBeta(ns, -color, limit - 1, alpha, beta, lbestMove, gene, values1, values2);
         }
     }
-    // 判断当前局面是否已经失败
-    if(mobility == 0 && color == BLACK && bcnt < wcnt)
-        ret -= 1000 * (ecnt == 0);
-    else if(mobility == 0 && color == WHITE && bcnt > wcnt)
-        ret += 1000 * (ecnt == 0);
-    // 返回加权后的价值
-    return (ret + mobility * 5 *(color == BLACK? 1 : -1));
-}
-
-/* 	MinMax搜索
-/	s是当前状态
-/	color是当前棋手持的棋子颜色（BLACK/WHITE）
-/	limit是最大搜索层数
-/ 	V是评估函数
-/	bestMove是最佳落子位置
-*/
-int MinMax(const State& s, int color, int limit, const valueFunc& V, int & bestMove)
-{
-    // 若达到了最大探索深度，则对当前状态使用启发式函数求估算的价值
-    if(limit == 0) return V(s, color);
-    // 获得当前颜色的棋子可移动的位置
-    auto avil = getAvail(s, color);
-    // 记录是否为叶子节点
-    bool isTerminal = true;
-    // 记录最佳效益值
-    int bestValue = 0;
-    int lbestMove;
-    // 记录是否在探索第一个子节点
-    bool isFirstTime = true;
-    // 遍历所有位置
-    for(size_t i = 0; i < avil.size(); ++i)
-    {
-        // 如果该位置当前棋手不可落子，检查下一状态
-        if(avil[i] == 0) continue;
-        // 发现了可落子位置，说明不是叶子节点
-        isTerminal = false;
-        // 生成在该点落子的子状态
-        auto ns = s;
-        ns[i] = (uint8_t)color;
-        // 下一轮的棋子颜色
-        int nextColor = (color == BLACK) ? WHITE : BLACK;
-        // 获取子状态的效益值
-        auto ret = MinMax(ns, nextColor, limit - 1, V, lbestMove);
-        // 以下三种情况更新最佳效益值
-        // 1. 第一次探索子状态
-        // 2. 当前棋手持黑子，且子状态效益值大于最佳效益值
-        // 2. 当前棋手持白子，且子状态效益值小于最佳效益值
-        if(isFirstTime || (color == BLACK && ret > bestValue) || (color == WHITE && ret < bestValue))
-        {
-            bestValue = ret;
-            bestMove = i;
-        }
-        isFirstTime = false;
-    }
-    // 未发现可落子位置，则对当前状态使用启发式函数求估算的价值
-    if(isTerminal) return V(s, color);
-    // 返回最佳效益值
-    return bestValue;
-}
-
-/* 	MinMax搜索
-/	s是当前状态
-/	color是当前棋手持的棋子颜色（BLACK/WHITE）
-/	limit是最大搜索层数
-/ 	V是评估函数
-/	alpha是alpha值
-/	beta是beta值
-/	bestMove是最佳落子位置
-*/
-int AlphaBeta_worker(const State& s, int color, int limit, const valueFunc& V,
-              int alpha, int beta);
-int AlphaBeta(const State& s, int color, int limit, const valueFunc& V,
-              int alpha, int beta, int & bestMove)
-{
-    // 若达到了最大探索深度，则对当前状态使用启发式函数求估算的价值
-    if(limit == 0) return V(s, color);
-    // 获得当前颜色的棋子可移动的位置
-    auto avil = getAvail(s, color);
-    // 记录是否为叶子节点
-    bool isTerminal = true;
-    int lbestMove;
-    // 若当前棋手持黑子
     if(color == BLACK)
     {
-        // 遍历所有位置
-        for(size_t i = 0; i < avil.size(); ++i)
+        for(const auto& a: avil)
         {
-            // 如果该位置当前棋手不可落子，检查下一状态
-            if(avil[i] == 0) continue;
-            // 发现了可落子位置，说明不是叶子节点
-            isTerminal = false;
-            // 生成在该点落子的子状态
-            auto ns = s;
-            ns[i] = (uint8_t)color;
-            // 下一轮的棋子颜色
-            int nextColor = (color == BLACK) ? WHITE : BLACK;
-            // 得到某个子节点的效用值
-            auto new_alpha = AlphaBeta(ns, nextColor, limit - 1, V, alpha, beta, lbestMove);
-            // 若子节点的效用值大于alpha值，则更新该值
+            auto x = a.x;
+            auto y = a.y;
+            memcpy(ns, board, 64 * sizeof(int));
+            ns[x][y] = (uint8_t)color;
+            auto new_alpha = AlphaBeta(ns, -color, limit - 1, alpha, beta, lbestMove, gene, values1, values2);
             if(new_alpha > alpha)
             {
                 alpha = new_alpha;
-                bestMove = i;
+                bestMove.x = x;
+                bestMove.y = y;
             }
-            // 当前节点的alpha值已经大于父节点的beta值，当前节点已经不会被选
             if(beta <= alpha)
-                //发送剪枝
                 break;
         }
-        // 未发现可落子位置，则对当前状态使用启发式函数求估算的价值
-        if(isTerminal) return V(s, color);
-        // 返回alpha值
-        else return alpha;
+        return alpha;
     }
-    // 若当前棋手持白子，同理
     else
     {
-        for(size_t i = 0; i < avil.size(); ++i)
-        {
-            if(avil[i] == 0) continue;
-            isTerminal = false;
-            auto ns = s;
-            ns[i] = (uint8_t)color;
-            int nextColor = (color == BLACK) ? WHITE : BLACK;
-            auto new_beta = AlphaBeta(ns, nextColor, limit - 1, V, alpha, beta, lbestMove);
-            if(new_beta < beta)
-            {
+        for(const auto& a: avil) {
+            auto x = a.x;
+            auto y = a.y;
+            memcpy(ns, board, 64 * sizeof(int));
+            ns[x][y] = (uint8_t) color;
+            auto new_beta = AlphaBeta(ns, -color, limit - 1, alpha, beta, lbestMove, gene, values1, values2);
+            if (new_beta < beta) {
                 beta = new_beta;
-                bestMove = i;
+                bestMove.x = x;
+                bestMove.y = y;
             }
-            if(beta <= alpha)
+            if (beta <= alpha)
                 break;
         }
-        if(isTerminal) return V(s, color);
-        else return beta;
+        return beta;
     }
 }
+void print_chess(int chess)
+{
+    if(chess == 1)
+        cout << "?";
+    else if (chess == -1)
+        cout << "?";
+    else
+        cout << " ";
 
+}
+
+void print_board(int board[8][8], int color) {
+
+    auto moves = get_actions(board, -color);
+    printf("------------------------------------\n");
+    printf("|   |");
+    for (int j = 0; j < 8; ++j)
+        printf(" %d |", j);
+    printf("\n------------------------------------\n");
+    for(int i = 0; i < 8; ++i)
+    {
+        printf("| %d |", i);
+        for(int j = 0; j < 8; ++j)
+        {
+            if(std::find_if(moves.begin(), moves.end(), [&](const auto& a){return a.x == i && a.y == j;}) != moves.end())
+            {
+                printf(" %s |", "+");
+            }
+            else
+            {
+                cout << " "; print_chess(board[i][j]); cout << " |";
+            }
+        }
+        printf("\n------------------------------------\n");
+    }
+
+}
+void print_game(int board[8][8], int x, int y, int color, bool start = false)
+{
+    int bcnt = 0;
+    int wcnt = 0;
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            if(board[i][j] == 1) bcnt++;
+            else if(board[i][j] == -1) wcnt++;
+        }
+    }
+    string str_color = color == 1 ? "black" : "white";
+    if(start)
+        cout << "Game start" << endl;
+    else{
+        if(x < 0)
+        {
+            cout << str_color << " can't play!" << endl;
+        }
+        else
+        {
+            cout << str_color << " put the chess piece in " << x << " " << y << endl;
+        }
+    }
+    print_board(board, color);
+    cout << "[Black: %d]" << bcnt << endl;
+    cout << "[White: %d]" << wcnt << endl;
+    cout << endl;
+
+}
+
+int pk(const chrom_t& g1, const chrom_t & g2)
+{
+//int(* board)[8] = new int [8][8]
+    int board[8][8] =
+            {{ 0, 0, 0, 0, 0, 0, 0, 0},
+             { 0, 0, 0, 0, 0, 0, 0, 0},
+             { 0, 0, 0, 0, 0, 0, 0, 0},
+             { 0, 0, 0,-1, 1, 0, 0, 0},
+             { 0, 0, 0, 1,-1, 0, 0, 0},
+             { 0, 0, 0, 0, 0, 0, 0, 0},
+             { 0, 0, 0, 0, 0, 0, 0, 0},
+             { 0, 0, 0, 0, 0, 0, 0, 0},};
+
+    double value1[8][8];
+    double value2[8][8];
+
+    explain(value1, g1);
+    explain(value2, g2);
+    chrom_t gene[2];
+    gene[0] = g1;
+    gene[1] = g2;
+    int color = BLACK;
+#ifdef USE_DEBUG
+    print_game(board, -1, -1, -1, true);
+#endif
+    while (true)
+    {
+        action a;
+        AlphaBeta(board, color, THINKINGLEVEL, -DBL_MAX, DBL_MAX, a, gene, value1, value2);
+        if(a.x != -1)
+        {
+            place(board, a.x, a.y, color);
+            color = -color;
+#ifdef USE_DEBUG
+            print_game(board, a.x, a.y, color);
+#endif
+        }
+        else
+        {
+            color = -color;
+            AlphaBeta(board, color, THINKINGLEVEL, -DBL_MAX, DBL_MAX, a, gene, value1, value2);
+            if(a.x != -1)
+            {
+                place(board, a.x, a.y, color);
+#ifdef USE_DEBUG
+                print_game(board, a.x, a.y, color);
+#endif
+            }
+            else
+            {
+                int bcnt = 0;
+                int wcnt = 0;
+                for (int i = 0; i < 8; ++i) {
+                    for (int j = 0; j < 8; ++j) {
+                        if(board[i][j] == 1) bcnt++;
+                        else if(board[i][j] == -1) wcnt++;
+                    }
+                }
+#ifdef USE_DEBUG
+                if(bcnt > wcnt) cout << "Black wins" << endl;
+                else if (bcnt < wcnt) cout << "White wins" << endl;
+                else cout << "Draw" << endl;
+#endif
+                if(bcnt > wcnt) return 1;
+                else if (bcnt < wcnt) return -1;
+                else return 0;
+            }
+        }
+    }
+    int bcnt = 0;
+    int wcnt = 0;
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            if(board[i][j] == 1) bcnt++;
+            else if(board[i][j] == -1) wcnt++;
+        }
+    }
+    if(bcnt > wcnt) return 1;
+    else if (bcnt == wcnt) return  0;
+    else return -1;
+}

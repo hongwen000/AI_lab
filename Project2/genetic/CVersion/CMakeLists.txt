@@ -7,5 +7,6 @@ find_package (Python3 COMPONENTS Interpreter Development)
 include_directories(${Python_INCLUDE_DIRS})
 message(STATUS ${Python_EXECUTABLE})
 
-add_executable(CVersion main.cpp)
+add_executable(CVersion main.cpp reversi.cpp)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 target_link_libraries(CVersion ${Python_LIBRARIES})
