@@ -50,7 +50,7 @@ bool end_evolution(int N, int round)
             cout << score[i] / total_pk << ", ";
         }
         cout << endl;
-        cout << "  Best is " << *max_element(score.begin(), score.end()) / total_pk << endl;
+        cout << "  Best is " << max_element(score.begin(), score.end()) - score.begin() << " with " << *max_element(score.begin(), score.end()) / total_pk << endl;
     }
     if(!score.empty())
     {
@@ -238,5 +238,5 @@ int main()
     timestr = string(time_buffer);
     strftime(time_buffer,sizeof(time_buffer),"%Y-%m-%d-%H-%M-%S",timeinfo);
     timestr = string(time_buffer);
-    genetic(26, 3, 0.05, 1, 1);
+    genetic(26, 0, 0.10, 1, 1);
 }

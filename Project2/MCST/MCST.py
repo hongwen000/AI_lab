@@ -3,8 +3,8 @@ import numpy as np
 from fast_place import get_actions
 from fast_place import place
 from fast_place import rand_place
+from fast_place import is_terminal
 from typing import *
-from copy import deepcopy
 from math import sqrt
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -36,11 +36,11 @@ class Node:
 
 Tree = Node
 
-def is_terminal(node: Node):
-    if(len(get_actions(node.board, node.color)) ==0 ):
-        if(len(get_actions(node.board, -node.color)) == 0):
-            return True
-    return False
+# def is_terminal(node: Node):
+#     if(len(get_actions(node.board, node.color)) ==0 ):
+#         if(len(get_actions(node.board, -node.color)) == 0):
+#             return True
+#     return False
 
 values_grid = np.array([[ 30, -25, 10, 5, 5, 10, -25,  30,],
                    [-25, -25,  1, 1, 1,  1, -25, -25,],
@@ -79,7 +79,7 @@ def best_child(node: Node):
 
 def transfer_to(node: Node, action):
     new_board = node.board.copy()
-    vaild = place(new_board, action[0], action[1], node.color)
+    place(new_board, action[0], action[1], node.color)
     new_color = -node.color
     new_node = Node(new_board, new_color, node)
     return new_node
@@ -92,7 +92,7 @@ def tree_walk(cur: Node):
     :return: 返回扩展的新节点
     """
     # 若当前状态不是游戏结束状态
-    while not is_terminal(cur):
+    while not is_terminal(cur.board, cur.color):
         # 获取所有可能行动
         A = get_actions(cur.board, cur.color)
         # 当前子节点数
@@ -126,7 +126,7 @@ def tree_walk_deep(cur: Node):
     :return: 返回扩展的新节点
     """
     # 若当前状态不是游戏结束状态
-    while not is_terminal(cur):
+    while not is_terminal(cur.board, cur.color):
         # 获取所有可能行动
         A = get_actions(cur.board, cur.color)
         # 当前子节点数
@@ -181,7 +181,7 @@ def tree_rush(node: Node):
     copy_color: int = node.color
     copy_color2: int = node.color
     cur = Node(node.board.copy(), copy_color, None)
-    while not is_terminal(cur):
+    while not is_terminal(cur.board, cur.color):
         # 采用某种快速决策的方法进行游戏直到结束状态
         cur = rush_strategy(cur)
     # 返回游戏结束状态估值
@@ -201,13 +201,13 @@ def best_action(node: Node):
     if len(A) == 0:
         if define_debug:
             print("pass")
-        return (-1,-1)
+        return (-1,-1), 0
     else:
         W = [c.w for c in node.C]
         idx = int(np.argmax(W))
         if define_debug:
             print("best choice is the child {}, with wining rate {}".format(idx, W[idx] / node.C[idx].n))
-        return A[idx]
+        return A[idx], idx
 
 def MCTS(root: Node, N):
     """
@@ -216,7 +216,7 @@ def MCTS(root: Node, N):
     :param N: 采样次数
     :return: 返回从当前根节点开始的最佳行动
     """
-    for i in tqdm.trange(N):
+    for _ in tqdm.trange(N):
     # for i in range(N):
         # 算法第1，2步，扩展新节点
         new_node = tree_walk(root)
@@ -231,18 +231,18 @@ def MCTS(root: Node, N):
     return best_action(root)
 
 def draw_tree_worker(node: Node, G):
-    G.add_node(id(node), label= "{}/{}".format(node.w, node.n))
+    G.add_node(id(node), label= "{}/{}".format(node.w, node.n), shape="record")
     for c in node.C:
         draw_tree_worker(c, G)
         G.add_edge(id(node), id(c))
 
-def draw_tree(T: Tree):
+def draw_tree(T: Tree, filen):
     G = gv.AGraph()
     draw_tree_worker(T, G)
     G.node_attr['shape'] = 'circle'
     G.edge_attr['color'] = 'red'
     G.layout(prog='dot')
-    G.draw('3.svg')
+    G.draw(filen)
     # img = mpimg.imread('first_pygraphviz.jpg')
     # imgplot = plt.imshow(img)
     # plt.show()
