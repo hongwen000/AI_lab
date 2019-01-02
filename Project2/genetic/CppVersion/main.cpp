@@ -20,12 +20,14 @@ struct tm * timeinfo;
 static char time_buffer[80];
 std::string timestr;
 
+// 随机数生成器
 std::random_device rd;
 std::mt19937 gen(rd());
 
+// 随机生成初始种群
 void random_gene(int N)
 {
-    std::uniform_int_distribution<> dis(-10, 10);
+    std::uniform_int_distribution<> dis(-100, 100);
 
     for(int i = 0; i < N; ++i)
     {
@@ -37,6 +39,10 @@ void random_gene(int N)
     }
 }
 
+/*
+* 判断是否结束进化
+* 打印并保存每轮进化结果
+*/
 bool end_evolution(int N, int round)
 {
     double total_pk = round * N;
@@ -75,10 +81,10 @@ bool end_evolution(int N, int round)
 }
 
 /*
- * ?????
- * ??????
- * round: ????
- * ?????????????
+ * 适应度函数
+ * 采用循环赛制
+ * round: 比赛轮数
+ * 返回值：每个染色体的适应度
  */
 std::vector<int> calc_fit(int N, int round)
 {
@@ -99,37 +105,24 @@ std::vector<int> calc_fit(int N, int round)
                 auto ret = pk(group[i], group[j]);
                 if(ret == 1)
                 {
-//                    printf("%d vs %d, %d wins\n", i, j, i);
                     sum+=1;
                 }
                 else if(ret == -1)
                 {
-//                    printf("%d vs %d, %d wins\n", i, j, j);
                     score[j]++;
                 }
             }
             score[i] += sum;
         }
-//        auto ss = std::accumulate(score.begin(), score.end(),draw);
-//        if(ss == N * (N-1) / 2)
-//            throw(std::runtime_error{"?"});
-//        else
-//        {
-//            cout << ss << " " << N * (N-1) / 2 << endl;
-//            throw(std::runtime_error{"??"});
-//        }
     }
-//    auto m = std::min_element(score.begin(), score.end());
-//    if(*m < 0)
-//        for(auto&i: score) i -= *m;
     return score;
 }
 
 /*
- * ?????
- * p1: ????
- * p2: ????
- * ???? ?????????
+ * 染色体交叉
+ * p1: 双亲之一
+ * p2: 双亲之一
+ * 返回值： 交叉的到的新染色体
  */
 chrom_t cross_chrom(const chrom_t& p1, const chrom_t& p2)
 {
@@ -153,29 +146,22 @@ chrom_t cross_chrom(const chrom_t& p1, const chrom_t& p2)
     return new_gene;
 }
 
+/*
+* 归一化
+*/
 void normalize(chrom_t & gene)
 {
-    int too_small = 1;
-    for(int i = 0; i < GENE_CNT; ++i)
-    {
-        if(abs(gene[i]) > 1) too_small--;
-    }
-    if(too_small >= 0)
-    {
-        for(int i = 0; i < GENE_CNT; ++i)
-            gene[i] *= 10;
-    }
-    bool too_large = false;
-    for(int i = 0; i < GENE_CNT; ++i)
-    {
-        if(abs(gene[i]) > 100000) too_large = true;
-    }
-    if(too_large)
-    {
-        for(int i = 0; i < GENE_CNT; ++i)
-            gene[i] /= 10.0;
-    }
+    double m = 0;
+    for(auto&i : gene) if(abs(i) > m) m = abs(i);
+    for(auto&i: gene) i = (100) * (i / m);
 }
+
+/*
+ * 基因突变
+ * gene: 进行突变的基因
+ * R: 突变概率
+ * D: 最大突变程度
+ */
 void mutate_gene(chrom_t& gene, double R, double D)
 {
     std::uniform_real_distribution<> dis(0, 1.0);
@@ -184,11 +170,19 @@ void mutate_gene(chrom_t& gene, double R, double D)
     {
         if(dis(gen) < R)
         {
-            gene[i] += dis2(gen) * D * gene[i];
+            gene[i] += dis2(gen) * D;
         }
     }
 }
 
+/*  遗传算法
+*   param N: 种群数量
+*   param M: 克隆数量
+*   param R: 基因突变率
+*   param D: 基因突变程度
+*  param round: 执行循环赛测试适应度的轮数
+*   return: 生成的最优染色体
+*/
 chrom_t genetic(int N, int M, double R, double D, int round)
 {
     if(N < 2 || M > N)

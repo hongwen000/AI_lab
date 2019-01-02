@@ -111,15 +111,6 @@ bool fc(int level, int v, int i)
             return true;
     }
     return false;
-    for(int i = v + 1; i < GAMESCALE; ++i)
-    {
-        if(is_domain_empty(domains[i]))
-        {
-//            cout << "DWO happend at variable " << v << endl;
-            return true;
-        }
-    }
-    return false;
 }
 
 void BT(int level)

@@ -59,6 +59,9 @@ kernel_elf_dump
 cmake-build-debug
 cmake-build-debug/
 /*/cmake-build-debug/
+*build*
+*build*/
+/*/*build*/
 build
 build
 /*/build/
@@ -70,3 +73,6 @@ handon
 Project2/*.c
 Project2/*.so
 Project2/*/build
+.ipynb_checkpoints
+*txt.user
+*.param

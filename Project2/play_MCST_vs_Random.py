@@ -1,17 +1,11 @@
-'''
-    黑白棋（Reversi）样例程序
-    随机策略
-    作者：林舒
-    游戏信息：http://www.botzone.org/games#Reversi
-'''
-
 import json
 import numpy
 import numpy as np
 import random
 import fast_place
-import MCST.MCST as MCST
+import MCTS.MCTS as MCTS
 from config import *
+from tqdm import trange
 
 
 DIR = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)) # 方向向量
@@ -126,21 +120,24 @@ def calc_winner(board):
             print("draw")
         return 0
 
+ret = 0
+iters = 0
 
 def pk(N: int) -> None:
     board, color = init_board()
-    root = MCST.Node(board, color, None)
+    root = MCTS.Node(board.copy(), color, None)
     cur = root
     if(define_debug):
         print_game(board, -1, -1, -1, start=True)
     while True:
         if (color == WHITE):
-            (x, y), idx = MCST.MCTS(cur, N)
-            # x, y = fast_place.rand_place(board, color)
+            # (x, y), idx = MCTS.MCTS(cur, N)
+            x, y = fast_place.rand_place(board, color)
+            idx = -1
         else:
-            (x, y), idx = MCST.MCTS(cur, N)
-        if not x == -1:
+            (x, y), idx = MCTS.MCTS(cur, N)
             cur = cur.C[idx]
+        if not x == -1:
             fast_place.place(board, x, y, color)
             if(define_debug):
                 print_game(board, x, y, color)
@@ -149,11 +146,11 @@ def pk(N: int) -> None:
         else:
             if not fast_place.is_terminal(board, color):
                 if (color == WHITE):
-                    (x, y), idx = MCST.MCTS(cur, N)
-                    cur = cur.C[idx]
-                    # x, y = fast_place.rand_place(board, color)
+                    # (x, y), idx = MCTS.MCTS(cur, N)
+                    # cur = cur.C[idx]
+                    x, y = fast_place.rand_place(board, color)
                 else:
-                    (x, y), idx = MCST.MCTS(cur, N)
+                    (x, y), idx = MCTS.MCTS(cur, N)
                     cur = cur.C[idx]
                 fast_place.place(board, x, y, color)
                 if(define_debug):
@@ -161,40 +158,14 @@ def pk(N: int) -> None:
                 color = -color
                 continue
             else:
-                MCST.draw_tree(root, 'MCST.svg')
-                calc_winner(board)
+                # MCTS.draw_tree(root, 'MCTS.svg')
+                global ret
+                if calc_winner(board) == 1:
+                    ret += 1
+                global iters
+                iters += 1
                 break
 
-# def pk(N):
-#     board, color = init_board()
-#     if(define_debug):
-#         print_game(board, -1, -1, -1, start=True)
-#     while True:
-#         if (color == WHITE):
-#             x, y = fast_place.rand_place(board, color)
-#         else:
-#             root = MCST.Node(board, color, None)
-#             x, y = MCST.MCTS(root, N)
-#         if not x == -1:
-#             fast_place.place(board, x, y, color)
-#             if(define_debug):
-#                 print_game(board, x, y, color)
-#             color = -color
-#             continue
-#         else:
-#             if (color == WHITE):
-#                 x, y = fast_place.rand_place(board, color)
-#             else:
-#                 root = MCST.Node(board, color, None)
-#                 x, y = MCST.MCTS(root, N)
-#             if not x == -1:
-#                 fast_place.place(board, x, y, color)
-#                 if(define_debug):
-#                     print_game(board, x, y, color)
-#                 color = -color
-#                 continue
-#             else:
-#                 calc_winner(board)
-#                 break
-
-pk(100)
+for i in trange(100):
+    pk(100)
+    print(ret, iters)

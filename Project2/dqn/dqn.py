@@ -1,43 +1,4 @@
 import numpy as np
-def init_Q(S, A):
-    #TODO
-    return np.array([[]])
-
-def init_D(S):
-    #TODO
-    return []
-
-def init_R(S, A):
-    #TODO
-    return np.array([[]])
-
-def is_coverage(Q)->bool:
-    #TODO
-    return False
-
-def choose_state(S):
-    #TODO
-    pass
-
-def is_terminal(s)->bool:
-    #TODO
-    return False
-
-def choose_action(A):
-    # TODO
-    pass
-
-def transfer(s, a):
-    # TODO
-    pass
-
-def minibatch(D):
-    # TODO
-    return [[]]
-
-def gradient_descent(y, predict):
-    # TODO
-    pass
 
 def DQN(S, A, N, M, alpha, gamma):
     """
@@ -90,4 +51,44 @@ def QDecision(Q,A,s):
     :return: 当前状态下的最后决策
     """
     # 选择Q(s,a)最大的行动a
-    return A[argmax(Q[s,:])]
+    return A[np.argmax(Q[s,:])]
+
+def init_Q(S, A):
+    #TODO
+    return np.array([[]])
+
+def init_D(S):
+    #TODO
+    return []
+
+def init_R(S, A):
+    #TODO
+    return np.array([[]])
+
+def is_coverage(Q)->bool:
+    #TODO
+    return False
+
+def choose_state(S):
+    #TODO
+    pass
+
+def is_terminal(s)->bool:
+    #TODO
+    return False
+
+def choose_action(A):
+    # TODO
+    pass
+
+def transfer(s, a):
+    # TODO
+    pass
+
+def minibatch(D):
+    # TODO
+    return [[]]
+
+def gradient_descent(y, predict):
+    # TODO
+    pass

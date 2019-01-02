@@ -10,11 +10,11 @@ using namespace std;
 #include <functional>
 #define BLACK 1
 #define WHITE -1
-#define THINKINGLEVEL 5
+#define THINKINGLEVEL 8
 
 //#define USE_GENE_DEBUG
 //#define USE_DEBUG
-#define GENE_CNT 13
+#define GENE_CNT 10
 using chrom_t = array<double, GENE_CNT>;
 using chrom_t = array<double, GENE_CNT>;
 int pk(const chrom_t& g1, const chrom_t & g2);

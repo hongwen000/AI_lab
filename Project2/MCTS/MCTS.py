@@ -36,41 +36,27 @@ class Node:
 
 Tree = Node
 
-# def is_terminal(node: Node):
-#     if(len(get_actions(node.board, node.color)) ==0 ):
-#         if(len(get_actions(node.board, -node.color)) == 0):
-#             return True
-#     return False
-
-values_grid = np.array([[ 30, -25, 10, 5, 5, 10, -25,  30,],
-                   [-25, -25,  1, 1, 1,  1, -25, -25,],
-                   [ 10,   1,  5, 2, 2,  5,   1,  10,],
-                   [  5,   1,  2, 1, 1,  2,   1,   5,],
-                   [  5,   1,  2, 1, 1,  2,   1,   5,],
-                   [ 10,   1,  5, 2, 2,  5,   1,  10,],
-                   [-25, -25,  1, 1, 1,  1, -25, -25,],
-                   [ 30, -25, 10, 5, 5, 10, -25,  30,]])
 
 def get_value(node: Node):
+    """
+    获取节点估值
+    :param node:
+    :return:
+    """
     if len(node.C) == 0:
         return 0
     W = np.array([c.w for c in node.C])
     N = np.array([c.n for c in node.C])
     t = np.log(np.sum(N))
-    value = W / N + arg_C * np.sqrt(t/N)
-    return value
-
-def get_value_heru(node: Node):
-    if len(node.C) == 0:
-        return 0
-    W = np.array([c.w for c in node.C])
-    N = np.array([c.n for c in node.C])
-    t = np.log(np.sum(N))
-    heru = (values_grid * node.board).sum()
-    value = heru + W / N + arg_C * np.sqrt(t/N)
+    value = W / N + arg_C * np.sqrt(t/(N+1))
     return value
 
 def best_child(node: Node):
+    """
+    获取最优子节点
+    :param node:
+    :return:
+    """
     value = get_value(node)
     b = int(np.argmax(value))
     if b >= len(node.C):
@@ -78,6 +64,12 @@ def best_child(node: Node):
     return node.C[b]
 
 def transfer_to(node: Node, action):
+    """
+    转移到子节点
+    :param node:
+    :param action: 行动
+    :return:
+    """
     new_board = node.board.copy()
     place(new_board, action[0], action[1], node.color)
     new_color = -node.color
@@ -119,50 +111,25 @@ def tree_walk(cur: Node):
     # 处理调用时就是结束状态的情况
     return cur
 
-def tree_walk_deep(cur: Node):
-    """
-    实现算法的选择步和扩展步
-    :param cur: 当前节点
-    :return: 返回扩展的新节点
-    """
-    # 若当前状态不是游戏结束状态
-    while not is_terminal(cur.board, cur.color):
-        # 获取所有可能行动
-        A = get_actions(cur.board, cur.color)
-        # 当前子节点数
-        num_child = len(cur.C)
-        # 处理弃局的情况
-        if len(A) == 0:
-            # 已经生成子节点
-            if num_child == 1:
-                cur = cur.c[0]
-            else:
-                # 没有生成子节点
-                new_node = transfer_to(cur, (-1,-1))
-                cur.C.append(new_node)
-                return new_node
-        else:
-            if num_child == len(A):
-                # 当前节点所有子节点均已探索过
-                cur = best_child(cur)
-            else:
-                v = np.max(get_value_heru(cur))
-                if v < arg_Explore(cur):
-                    # 还有尚未扩展的子节点，则扩展出该节点
-                    new_node = transfer_to(cur, A[num_child])
-                    cur.C.append(new_node)
-                    return new_node
-                else:
-                    cur = best_child(cur)
-    # 处理调用时就是结束状态的情况
-    return cur
+
 def rush_strategy(cur: Node):
+    """
+    快速走子实现
+    :param cur:
+    :return:
+    """
     x, y = rand_place(cur.board, cur.color)
     place(cur.board, x, y, cur.color)
     cur.color = -cur.color
     return cur
 
 def get_winner(final: Node, color):
+    """
+    判断胜者
+    :param final:
+    :param color:
+    :return:
+    """
     black_score = np.sum(final.board == 1)
     white_score = np.sum(final.board == -1)
     if black_score > white_score:
@@ -190,6 +157,11 @@ def tree_rush(node: Node):
     return get_winner(cur, node.color)
 
 def feedback(node: Node, reward):
+    """
+    返回步
+    :param node:
+    :param reward:
+    """
     while node is not None:
         node.n += 1
         node.w += reward
@@ -197,6 +169,11 @@ def feedback(node: Node, reward):
 
 
 def best_action(node: Node):
+    """
+    获取最佳行动
+    :param node:
+    :return:
+    """
     A = get_actions(node.board, node.color)
     if len(A) == 0:
         if define_debug:
@@ -216,7 +193,7 @@ def MCTS(root: Node, N):
     :param N: 采样次数
     :return: 返回从当前根节点开始的最佳行动
     """
-    for _ in tqdm.trange(N):
+    for _ in range(N):
     # for i in range(N):
         # 算法第1，2步，扩展新节点
         new_node = tree_walk(root)
@@ -237,6 +214,11 @@ def draw_tree_worker(node: Node, G):
         G.add_edge(id(node), id(c))
 
 def draw_tree(T: Tree, filen):
+    """
+    绘制蒙特卡洛树
+    :param T:
+    :param filen:
+    """
     G = gv.AGraph()
     draw_tree_worker(T, G)
     G.node_attr['shape'] = 'circle'

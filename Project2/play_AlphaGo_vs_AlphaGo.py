@@ -1,17 +1,13 @@
-'''
-    黑白棋（Reversi）样例程序
-    随机策略
-    作者：林舒
-    游戏信息：http://www.botzone.org/games#Reversi
-'''
-
-import json
 import numpy
+from typing import *
 import numpy as np
-import random
 import fast_place
-import MCST.MCST as MCST
+import AlphaGo.MCTS as MCTS
 from config import *
+from mxnet.gluon import data as gdata
+from mxnet import nd
+from tqdm import trange
+import multiprocessing as mp
 
 
 DIR = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)) # 方向向量
@@ -25,10 +21,10 @@ def place(board, x, y, color):
     for d in range(8):
         i = x + DIR[d][0]
         j = y + DIR[d][1]
-        while 0 <= i and i < 8 and 0 <= j and j < 8 and board[i][j] == -color:
+        while 0 <= i < 8 and 0 <= j < 8 and board[i][j] == -color:
             i += DIR[d][0]
             j += DIR[d][1]
-        if 0 <= i and i < 8 and 0 <= j and j < 8 and board[i][j] == color:
+        if 0 <= i < 8 and 0 <= j < 8 and board[i][j] == color:
             while True:
                 i -= DIR[d][0]
                 j -= DIR[d][1]
@@ -127,29 +123,34 @@ def calc_winner(board):
         return 0
 
 
-def pk(N):
+def pk(N: int, net, ctx) -> MCTS.Node:
     board, color = init_board()
+    root = MCTS.Node(board.copy(), color, None, None)
+    Game = MCTS.MCTS(net, ctx)
+    cur = root
     if(define_debug):
         print_game(board, -1, -1, -1, start=True)
     while True:
         if (color == WHITE):
-            x, y = fast_place.rand_place(board, color)
+            x, y = Game.Run(cur, N)
+            # x, y = fast_place.rand_place(board, color)
         else:
-            root = MCST.Node(board, color, None)
-            x, y = MCST.MCTS(root, N)
+            x, y = Game.Run(cur, N)
         if not x == -1:
+            cur = cur.C[(x,y)]
             fast_place.place(board, x, y, color)
             if(define_debug):
                 print_game(board, x, y, color)
             color = -color
             continue
         else:
-            if (color == WHITE):
-                x, y = fast_place.rand_place(board, color)
-            else:
-                root = MCST.Node(board, color, None)
-                x, y = MCST.MCTS(root, N)
-            if not x == -1:
+            if not fast_place.is_terminal(board, color):
+                if (color == WHITE):
+                    x, y = Game.Run(cur, N)
+                    # x, y = fast_place.rand_place(board, color)
+                else:
+                    x, y = Game.Run(cur, N)
+                cur = cur.C[(x,y)]
                 fast_place.place(board, x, y, color)
                 if(define_debug):
                     print_game(board, x, y, color)
@@ -158,5 +159,68 @@ def pk(N):
             else:
                 calc_winner(board)
                 break
+    return root
 
-pk(3000)
+def generate_data_worker(node: MCTS.Node, E):
+    if node.z is not None and len(node.pi) != 0:
+        e = MCTS.to_example(node)
+        E.append(e)
+    for c in node.C.values():
+        generate_data_worker(c, E)
+
+# def generate_data(N: int):
+#     Ex = []
+#     for i in range(N):
+#         E = []
+#         root = pk(100)
+#         generate_data_worker(root, E)
+#         Ex.append(E)
+#     return Ex
+#
+#
+# def to_mxnet_dataset(E:List[List[Tuple[np.ndarray, int, np.ndarray]]]):
+#     for game in E:
+#         l_s, l_z, l_pi = zip(*game)
+#         features = np.array(l_s)
+#         z = np.array(l_z)
+#         pi = np.array(l_pi)
+#
+
+
+# ret = generate_data(1)
+
+def to_mxnet_dataset(Ex:List[Tuple[np.ndarray, int, np.ndarray]]):
+    l_s, l_z, l_pi = zip(*Ex)
+    features = nd.array(np.array(l_s))
+    z = nd.array(np.array(l_z))
+    pi = nd.array(np.array(l_pi))
+    ret = gdata.ArrayDataset(features, list(zip(z,pi)))
+    return ret
+
+def get_mxnet_dataset(play_n: int, mcst_n: int, net, ctx):
+    Ex = []
+    for i in trange(play_n):
+        root = pk(mcst_n, net, ctx)
+        generate_data_worker(root, Ex)
+    return to_mxnet_dataset(Ex)
+
+# def to_dataset(Ex:List[Tuple[np.ndarray, int, np.ndarray]]):
+#     l_s, l_z, l_pi = zip(*Ex)
+#     features = nd.array(np.array(l_s))
+#     z = nd.array(np.array(l_z))
+#     pi = nd.array(np.array(l_pi))
+#     return features, z,pi
+
+# def get_dataset(play_n: int, mcst_n: int):
+#     return to_dataset(generate_data(play_n, mcst_n))
+# ret = generate_data(1)
+#
+# dataset = to_mxnet_dataset(ret)
+# pass
+# batch_size = 10
+# data_iter = gdata.DataLoader(dataset, batch_size, shuffle=True)
+
+# for X, y in data_iter:
+#     print(X, y)
+#     break
+
